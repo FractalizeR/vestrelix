@@ -9,6 +9,9 @@ independent destinations. The application is not implemented yet.
 Planned capabilities include a VictoriaLogs input, configurable event rules,
 HTTP notifications, persistent retries, and Prometheus-compatible metrics.
 
+See [Functional scope](FEATURES.md) for the agreed requirements, initial acceptance
+scenario, extension points, and open design decisions.
+
 ## Development
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md). Publication checks and repository
