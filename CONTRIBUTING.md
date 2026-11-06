@@ -61,4 +61,9 @@ checks, and CodeQL when tracked Go files appear. The module targets Go 1.27.
 Do not add placeholder application code solely to make a scanner run.
 
 After changing publication tooling, run its tests and both publication checks.
-After changing workflows, run actionlint and the pinned zizmor check used in CI.
+After changing workflows or Dependabot settings, run actionlint on workflows and
+the pinned zizmor check from the repository root, matching CI's collection scope:
+
+```sh
+zizmor --offline --no-progress .
+```
