@@ -1,0 +1,219 @@
+# System overview
+
+**Status: approved architectural direction.** Detailed block specifications remain
+subject to individual approval. See [Open decisions](open-decisions.md) for the
+limits of this baseline.
+
+## Deployment and scope
+
+Vestrelix runs as one Go process with one active instance and a local SQLite
+database. Initial integrations are VictoriaLogs and HTTP POST webhooks, with
+Pachca as the first intended webhook profile. Supported targets are linux/amd64,
+linux/arm64, and darwin/arm64.
+
+Observed services do not call Vestrelix synchronously. In particular, the first
+scenario neither changes Postfix configuration nor participates in SMTP delivery.
+Existing log storage remains the source of history; SQLite is not a log mirror.
+There is no distributed infrastructure, public plugin system, or application
+framework in the selected direction.
+
+## Logical blocks and data flow
+
+```text
+                       Configuration and process control
+                          schedules, limits, lifecycle
+                                      |
+VictoriaLogs -> Source access -> Extraction -> Detection and enrichment
+                               normalization             |
+                                                         | normalized event
+                                                         v
+                                              Routing and formatting
+                                                         |
+                                                  delivery jobs
+                                                         v
+                                                   HTTP delivery -> Webhook
+
+Enrichment -> source-specific history lookup -> Source access
+
+---------------------------- SQLite --------------------------------
+Read progress, replay protection, correlation context, pending work,
+events, destination-specific delivery jobs, and attempt results
+
+Observability, privacy, and resource control span the blocks.
+```
+
+These are logical responsibilities, not separate services or mandatory in-memory
+queues. The data-flow diagram is not a Go import graph.
+
+| Block | Receives and produces | State responsibility |
+| --- | --- | --- |
+| Configuration and process control | Configuration and operator requests; validated settings, schedules, and lifecycle actions | Compatibility with persisted work, validation-only behavior, isolated dry-run, and shutdown coordination |
+| Source access | Configured reads and context lookups; source records, read outcomes, and proposed progress | Source-specific progress meaning, bounded reads, completeness assessment, and source identity |
+| Extraction and normalization | Required source fields or text; usable fields or explicit unsupported/invalid/missing-data outcomes | No separate durable log store; reuse already available fields |
+| Detection, correlation, and enrichment | Normalized facts and related context; events, pending enrichment, or explicit unresolved outcomes | Minimal operation context, event identity, enrichment deadlines, and separate event/detection times |
+| Routing and formatting | Normalized event; zero or more audience-specific delivery assignments or visible formation failures | Destination selection, field allowlists, and fixed delivery content and destination revision |
+| Delivery | Persisted jobs; network attempt outcomes, retry schedules, success, or visible non-delivery | Independent destination queues, concurrency/rate limits, attempt budgets, and recovery of interrupted attempts |
+| SQLite state lifecycle | Domain transitions; durable atomic results | Transaction execution, migrations, bounded retention, capacity control, and recovery support |
+
+Domain blocks own the meaning of transitions. SQLite owns their durable
+representation, not the business decisions. A processing coordinator connects
+those decisions to the required atomic boundaries; see
+[Packages and dependencies](packages-and-dependencies.md).
+
+Source queries remain in input configuration. Portable detection logic contains
+no LogsQL. Rule configuration cannot supply arbitrary executable code, shell
+commands, or executable plugins.
+
+## Four distinct identities
+
+| Identity | Meaning | Insufficient substitute |
+| --- | --- | --- |
+| Source record | A specific record within a defined input/source identity scope | Text plus timestamp without a uniqueness contract |
+| Correlation | A particular observed operation | A Postfix queue ID without originating relay and lifecycle |
+| Event | A particular business occurrence under a stable rule | Correlation identity or triggering record identity alone |
+| Delivery | A notification of an event to one logical destination | A network attempt identifier |
+
+One operation may produce multiple events. Several records may establish one
+event. Each destination has independent delivery state. Network retries reuse the
+delivery identity rather than creating new jobs.
+
+Restarting or editing a template, rule description, or configuration revision does
+not by itself create a new event identity or resend historical notifications.
+Actual record and occurrence discriminators remain subject to
+[identity decisions](open-decisions.md#identities-and-source-coverage).
+
+## Durable boundaries
+
+### Accepting read results
+
+Read progress advances only together with durable processing consequences:
+replay protection, correlation updates, events, pending follow-up work, or explicit
+non-applicable/unsupported outcomes. A crash cannot acknowledge source records
+while losing their events or necessary further work.
+
+An incomplete or truncated read is not a successful empty read. Progress cannot
+skip uncovered portions of a source interval. Earlier independently completed
+portions may already be durable, provided replay remains safe.
+
+Completeness of a read concerns the requested selection at that time. It does not
+prove that no records with older timestamps will arrive later. Overlap and an
+explicit lateness bound address that separate problem.
+
+### Finalizing an event and assigning deliveries
+
+A finalized event is saved with its routing decision and delivery jobs, or with a
+durable, visible failure that preserves the unresolved delivery obligation. There
+is no unrecorded gap between accepting an event and remembering its delivery work.
+Selecting no destinations is an explicit routing outcome.
+
+Network operations are outside SQLite transactions. Concurrent read-modify-write
+transitions and ownership of delivery attempts must also be coordinated; atomic
+writes alone do not prevent competing workers from overwriting decisions.
+
+### Attempting delivery
+
+A job exists durably before any send. Attempt start is persisted and charged to
+its budget before the network operation. The resulting success, error, or next
+retry is then saved separately. An interrupted attempt can therefore consume
+budget without proving that a request reached the destination.
+
+SQLite and an arbitrary webhook cannot share one transaction. A crash after
+sending, or a lost response, leaves an ambiguous outcome. That outcome is retried
+within the configured budget, with the same delivery identity and content.
+
+## Delivery and recovery guarantees
+
+- A destination-defined successful response is required before recording success.
+- Ambiguous outcomes favor a possible duplicate over silently losing a notification.
+  Destination-supported idempotency keys reduce duplicates but cannot be assumed.
+- Retry state survives restart: finite timeouts, exponential backoff with jitter,
+  a maximum interval, bounded `Retry-After` handling, and finite automatic budgets.
+- Permanent failures and exhausted jobs remain visibly undelivered. Inspection,
+  explicit retry, expiry, and removal follow a documented retention policy.
+- The goal is at-least-once delivery with duplicate-tolerant consumers, not
+  unconditional eventual delivery or exactly-once HTTP delivery. A destination
+  that never recovers cannot be served by finite automatic retries.
+- Incomplete reads are replayed; durable enrichment resumes with its existing
+  deadline; interrupted sends recover as ambiguous attempts.
+- Commit recovery assumes correct durable SQLite settings and storage behavior.
+  It is not protection against losing the database disk.
+
+## First scenario: permanent mail rejection
+
+1. **Observe initial context.** The configured input includes context-bearing
+   records, not only rejection records. Preserve minimal envelope sender, subject,
+   original time, and sufficient operation-lifecycle evidence when available.
+   Bounded history lookup supplements this context. Persisting these facts avoids
+   relying exclusively on old log availability for rejection days later.
+2. **Recognize a recipient-specific rejection.** Detection requires a matching
+   domain, a final delivery failure, and explicit permanent rejection by the remote
+   SMTP server. `status=bounced` alone, local errors, deferrals, timeouts, and queue
+   expiry without remote rejection do not qualify. Only qualifying rejected
+   recipients produce events.
+3. **Wait for missing context.** Before read progress advances, missing context
+   becomes durable enrichment work. Out-of-order records or history lookup can
+   complete it within the allowed wait. Expiry produces a visible unresolved
+   outcome, not invented values or a raw-record fallback.
+4. **Create permitted messages.** Finalization and routing persist independent
+   delivery assignments. Each message contains only envelope sender, rejected
+   envelope recipient, decoded subject, and the agreed original timestamp. It
+   excludes body, attachments, other recipients, and raw SMTP diagnostics. JSON
+   and destination-specific message values are escaped correctly.
+5. **Read the same records again.** Record replay protection prevents repeating
+   already accepted record effects where supported by the source identity
+   contract. Event and delivery identities independently prevent recreating the
+   same business event and destination assignment.
+6. **Restart.** Before commit, processing may repeat from committed progress.
+   After commit, durable context, enrichment, and jobs survive. A later rejection
+   can use preserved original context within the supported observation and
+   retention horizon; ambiguous queue-ID reuse never becomes a guessed match.
+7. **Lose the webhook response.** If the webhook accepted the POST but its response
+   was lost, or the process crashed before saving success, the same job is retried.
+   A non-idempotent webhook may display a duplicate. Budget exhaustion records
+   non-delivery rather than claiming success.
+
+The source must actually contain the required context. This architecture cannot
+recover a subject or lifecycle evidence that was never logged. Observation start,
+history availability, timestamp meaning, missing subject, and domain matching are
+listed in [Mail scenario decisions](open-decisions.md#mail-scenario).
+
+## Privacy, capacity, and operations
+
+Persist minimal correlation context rather than raw logs. Record the applicable
+rule, configuration, and formatting revisions for admitted work; fix minimal
+formatted content and the applicable logical destination revision when admitting
+delivery work. Exact compatibility and change policies remain open. Secret
+material stays external; references alone must not allow a changed
+webhook URL to silently redirect existing jobs. An unavailable destination version
+visibly pauses affected work rather than substituting another recipient.
+
+Destination-specific queue/rate/concurrency limits prevent one destination from
+monopolizing resources. When its automatic queue reaches capacity, new assignments
+to it are recorded as visibly undelivered due to capacity, preserving inspection
+and explicit retry while allowing healthy destinations to proceed. Recording these
+failures still consumes storage: it is not an infinite fallback queue.
+
+At global storage exhaustion, admission pauses without falsely advancing progress.
+Existing deliveries continue only while storage can safely record their changes.
+Backlog may outlive source retention; corresponding coverage limitations must be
+visible. Pending and failed work never disappears through silent cleanup.
+
+SQLite, memory, query duration/size, processing work, and queues are explicitly
+bounded. Retention must preserve replay protection for supported re-reading,
+including paused inputs, or require an explicit decision about losing that
+guarantee. Concrete limits and recovery policy remain
+[open](open-decisions.md#resources-retention-and-operations).
+
+Expose `/metrics` through the standard Prometheus client, including process and Go
+runtime collectors and a stable `vestrelix_` application namespace. Labels have
+bounded cardinality and exclude event/record IDs and sensitive values. Safe
+diagnostics expose polling failures, lag, pending work, attempts, non-delivery,
+storage, and cleanup failures without raw records, payloads, credentials, or secret
+URLs. `/healthz` and `/readyz` have distinct meanings; a webhook outage does not
+trigger a liveness restart loop.
+
+Dry-run neither sends notifications nor changes production state or acknowledges
+production delivery jobs. Prevent feedback loops caused by observing Vestrelix's
+own notification activity. Graceful shutdown and interrupted-work recovery are
+required. Single-active-instance enforcement is local and fail-closed, not a
+distributed coordination mechanism.
