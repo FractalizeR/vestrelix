@@ -49,6 +49,9 @@ identity must be distinct concepts.
 - Handle duplicate and late-arriving records through overlapping windows and
   deduplication. Define the supported lateness bound explicitly; arbitrary delays
   cannot be covered by a finite lookback window.
+- Initially support log lateness up to one hour. For record replay protection,
+  accept collapsing completely identical records within one source view using a
+  stable content fingerprint; this is not a claim of physical-record uniqueness.
 - Bound request duration, response size, and records processed per query.
 - Distinguish a successful empty result from a failed, truncated, or incomplete
   query. Do not advance progress as though incomplete data were fully processed.
@@ -65,6 +68,9 @@ identity must be distinct concepts.
 - Tolerate related records arriving out of order with a bounded enrichment wait.
 - Define explicit outcomes for missing fields, unsupported records, and expired
   enrichment attempts; do not silently invent values or discard failures.
+- Log processing failures safely, allow destinations to opt into processing-error
+  notifications, and support destinations designated for system notifications.
+  Keep error reporting bounded and prevent recursive notification failures.
 - Preserve event time separately from detection time.
 - Produce a normalized event before formatting a destination-specific message.
 - Do not execute arbitrary code, shell commands, or executable plugins supplied
@@ -105,6 +111,10 @@ identity must be distinct concepts.
 - Bound automatic retry work by a configured time and/or attempt budget. Exhausted
   jobs become visibly undelivered and remain available for inspection and explicit
   retry under a documented retention policy.
+- Use an initial automatic retry policy of approximately ten retries within one
+  hour for source reads and webhook delivery. Persist budgets across restarts;
+  source-read exhaustion pauses the affected input without advancing progress.
+  Selected defaults are recorded in the architecture, not implemented behavior.
 - Provide an explicit operation to requeue undelivered jobs.
 - A failing destination must not block other destinations or the observed service.
 
@@ -167,14 +177,16 @@ whose domains match the allowlist. Correlation must account for the originating
 relay and the queue-ID lifecycle, including potential ID reuse.
 
 The notification contains only the SMTP envelope sender, the rejected SMTP
-recipient, the decoded subject, and the original submission timestamp. Do not
-include the body, attachments, other recipients, or raw SMTP diagnostics.
+recipient, the decoded subject, and the timestamp of receipt by the outbound
+relay. Do not include the body, attachments, other recipients, or raw SMTP
+diagnostics.
 
-Envelope addresses need not equal the `From:`/`To:` headers. The readily available
-timestamp is receipt by the outbound relay, not necessarily the message's `Date:`
-header. Confirm and document the final timestamp meaning before implementing the
-scenario. A rejection days later must still be correlated with the original
-message, including across Vestrelix restarts.
+Envelope addresses need not equal the `From:`/`To:` headers. The notification time
+means receipt by the outbound relay, not the message's `Date:` header or an earlier
+submission elsewhere. A rejection days later must still be correlated with the
+original message, including across Vestrelix restarts. Initially retain minimal
+message context for seven days. Longer-lived operations need an explicit policy;
+context expiry cannot silently remove pending processing or delivery obligations.
 
 ## Extension points, not initial-release commitments
 
@@ -205,15 +217,17 @@ require rewriting existing event rules. Do not build all adapters in advance.
 
 ## Decisions to resolve during design
 
-- Configuration format and the bounded expression/extraction mechanisms.
-- Source-record identities and late-record handling for each adapter.
+- Detailed YAML configuration and bounded expression/extraction mechanisms.
+- Fingerprint canonicalization, source-read completeness, and late-record handling
+  details for each adapter.
 - Enrichment lookup strategy, caching, and expiry semantics.
-- Default retry, timeout, capacity, and retention limits; behavior at capacity.
+- Remaining capacity/retention limits, configurable retry-policy details, and
+  behavior at capacity.
 - Dry-run isolation and explicit history replay/reprocessing behavior.
 - Rule/configuration revisions, state compatibility, and SQLite schema migrations.
 - Safe health/readiness criteria and the initial metric/alert contract.
-- Recipient-domain/subdomain matching, missing-subject handling, and timestamp
-  semantics for the mail scenario.
+- Recipient-domain/subdomain matching, missing-subject handling, context-retention
+  boundaries, and queue-ID lifecycle discrimination for the mail scenario.
 
 Changing a template or restarting the process must not silently resend historical
 events. History replay and manual retries are explicit operations, not incidental

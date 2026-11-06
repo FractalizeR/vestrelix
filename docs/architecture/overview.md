@@ -68,7 +68,7 @@ commands, or executable plugins.
 
 | Identity | Meaning | Insufficient substitute |
 | --- | --- | --- |
-| Source record | A specific record within a defined input/source identity scope | Text plus timestamp without a uniqueness contract |
+| Source record | The replay-equivalence identity of a record within an input/source view | Stream ID plus time as a supposedly unique physical-record ID |
 | Correlation | A particular observed operation | A Postfix queue ID without originating relay and lifecycle |
 | Event | A particular business occurrence under a stable rule | Correlation identity or triggering record identity alone |
 | Delivery | A notification of an event to one logical destination | A network attempt identifier |
@@ -77,10 +77,58 @@ One operation may produce multiple events. Several records may establish one
 event. Each destination has independent delivery state. Network retries reuse the
 delivery identity rather than creating new jobs.
 
+For the initial release, a stable fingerprint of the canonical source record is
+the accepted replay policy. Completely identical records within the same source
+view may collapse, even if they were physically distinct. This deliberate
+equivalence is not a uniqueness claim about timestamps, stream IDs, or hashes.
+Fingerprint changes require a compatibility decision, not automatic replay.
+
 Restarting or editing a template, rule description, or configuration revision does
 not by itself create a new event identity or resend historical notifications.
-Actual record and occurrence discriminators remain subject to
-[identity decisions](open-decisions.md#identities-and-source-coverage).
+Canonicalization compatibility and business-occurrence discriminators remain
+[open](open-decisions.md#identities-and-source-coverage).
+
+## Agreed operating policies
+
+These choices come from product decisions, not observations about a particular
+deployment. They do not approve the full draft ingestion algorithm.
+
+| Policy | Initial choice |
+| --- | --- |
+| Supported log lateness | One hour; the ingestion draft defines the proposed visibility/clock contract |
+| Minimal message context | Seven days; expiry anchor, dependencies, and longer-lived operations require the detection/state contract |
+| Mail notification time | Receipt by the outbound relay, not the message `Date:` header or earlier submission |
+| Automatic retries | Initial attempt plus at most ten retries, subject to a one-hour wall-clock budget |
+| Network request timeout | 15 seconds, shortened by the remaining operation budget |
+| Exponential retry delay | Start at 15 seconds, double, cap the randomized delay at ten minutes |
+| Jitter | Uniform multiplier from 0.9 to 1.1 before applying the ten-minute cap |
+
+The one-hour/approximately-ten-retry direction is approved; the concrete retry
+defaults above are selected under the delegated choice of numbers. They remain
+configurable. Without jitter the ten delays total 55 minutes 45 seconds. A new
+attempt cannot start after the deadline or exceed the remaining budget. Restarts
+do not replenish attempts or reset deadlines. Permanent failures do not consume a
+full transient retry sequence.
+
+Source-read budget exhaustion pauses the affected input at its committed progress
+until explicit resumption. Webhook exhaustion leaves a visibly undelivered job.
+Other inputs and destinations remain independently schedulable. Explicit
+resumption/requeue budget rules are part of the respective detailed block design.
+`Retry-After` cannot be shortened into an early retry: if it cannot be honored
+within the applicable bounds and remaining budget, expose the stopped work.
+
+The retry hour is not the supported lifetime of a mail operation, source-history
+retention, or the permitted duration of every process outage. Source data must
+remain available for catch-up and late-record checks. Seven-day context retention
+is not a promise about arbitrary hold, requeue, or externally delayed operations.
+
+Processing failures produce safe structured logs and bounded metrics. A
+destination can opt into processing-error messages; a system destination can
+receive operational notices. These are agreed capabilities, not a finalized
+routing schema. Audience selection, safe fields, rate/deduplication limits, and
+delivery-error loop prevention require the routing/operations contracts. Metrics
+are exposed for external monitoring and alerting; no new alerting adapter is
+implied.
 
 ## Durable boundaries
 
@@ -156,7 +204,7 @@ within the configured budget, with the same delivery identity and content.
    outcome, not invented values or a raw-record fallback.
 4. **Create permitted messages.** Finalization and routing persist independent
    delivery assignments. Each message contains only envelope sender, rejected
-   envelope recipient, decoded subject, and the agreed original timestamp. It
+   envelope recipient, decoded subject, and the outbound relay receipt timestamp. It
    excludes body, attachments, other recipients, and raw SMTP diagnostics. JSON
    and destination-specific message values are escaped correctly.
 5. **Read the same records again.** Record replay protection prevents repeating
@@ -174,7 +222,7 @@ within the configured budget, with the same delivery identity and content.
 
 The source must actually contain the required context. This architecture cannot
 recover a subject or lifecycle evidence that was never logged. Observation start,
-history availability, timestamp meaning, missing subject, and domain matching are
+history availability, missing subject, and domain matching are
 listed in [Mail scenario decisions](open-decisions.md#mail-scenario).
 
 ## Privacy, capacity, and operations

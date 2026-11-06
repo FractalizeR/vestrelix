@@ -8,9 +8,9 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Reliable record identity for VictoriaLogs, including distinct records with identical text/time and overlapping configured inputs | Source access and ingestion |
-| Evidence of complete bounded reads for the supported VictoriaLogs API/version, including partial responses, query operators, equal timestamps, and pagination behavior | VictoriaLogs input |
-| Supported lateness, observation start/backfill, outage/catch-up horizon, and source-retention assumptions | Ingestion and processing |
+| Canonical fingerprint encoding and source-view compatibility, including field visibility, overlapping inputs, and changes to the full identity representation | Source access and ingestion |
+| Acceptance evidence for the proposed bounded-read protocol and supported VictoriaLogs API/version, including query-subset validation, mid-response errors, partial responses, and equal timestamps | VictoriaLogs input |
+| Detailed discovery/settlement behavior for the agreed one-hour lateness, observation start/backfill, outage/catch-up horizon, and source-retention assumptions | Ingestion and processing |
 | Stable business-occurrence discriminators distinct from correlation and source records | Detection |
 | Replay-protection lifetime and behavior when a paused input still needs old markers | Processing and SQLite state lifecycle |
 
@@ -20,9 +20,8 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | --- | --- |
 | Availability of subject, envelope data, and lifecycle evidence without changing Postfix configuration or the SMTP path | Postfix detection profile and source access |
 | Unambiguous originating-relay and queue-ID lifecycle identification, including reuse | Postfix detection profile |
-| Final timestamp meaning: relay receipt is readily available but not automatically the message `Date:` header or original submission time | Postfix detection profile |
-| Recipient domain/subdomain matching and missing/undecodable subject outcomes | Postfix detection profile |
-| Maximum supported message lifetime, minimal context contents, retention, and treatment of messages predating observation | Detection and enrichment |
+| Recipient domain/subdomain matching and missing/undecodable/folded/truncated subject outcomes and terminal-error timing | Postfix detection profile |
+| Seven-day context expiry anchor, dependencies of pending work, minimal contents, longer-lived operations, and messages predating observation | Detection and enrichment |
 | Enrichment lookup binding, caching, wait/retry bounds, and terminal unresolved outcomes | Detection, processing, and source access |
 
 ## Configuration and state compatibility
@@ -42,16 +41,17 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Destination success criteria and permanent/transient error classification | Delivery and webhook profile |
 | Binding old jobs to destination versions, credential rotation versus recipient changes, and unavailable/revoked references | Configuration, routing, and delivery |
 | Redirect policy and relation between durable attempts and physical sends, including standard HTTP transport retries | HTTP delivery |
-| Concrete timeout/backoff/jitter/`Retry-After` bounds and automatic attempt/time budgets | Delivery |
+| Detailed retry accounting and error classification under the selected defaults, including `Retry-After` handling and queue wait versus attempt deadline | Delivery |
 | Explicit requeue budget/deadline rules and deduplication horizon after retained events/jobs expire | Delivery and processing |
 
 ## Resources, retention, and operations
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Numerical SQLite, memory, read, processing, concurrency, rate, queue, and retention limits | Each resource-owning block |
+| Approval/validation of proposed ingestion limits; remaining SQLite, processing, rate, queue, and retention limits | Each resource-owning block |
 | Detailed recovery and operator actions after per-destination/global capacity exhaustion; observable expiry/removal of failed work | Delivery, processing, and SQLite state lifecycle |
 | Health/readiness criteria, stable metric/alert contract, and diagnostic retention | Operations |
+| Destination processing-error opt-in versus system-notification scope, safe fields, bounded repetition, and recursion prevention | Routing, delivery, and operations |
 | Local single-active-instance enforcement and supported local-storage assumptions | Process control and SQLite state lifecycle |
 
 The agreed destination-capacity direction is recorded in the
@@ -59,3 +59,9 @@ The agreed destination-capacity direction is recorded in the
 non-delivery for the affected destination rather than blocking healthy
 destinations solely on its automatic queue. Concrete limits and the detailed
 recovery/retention contract remain open.
+
+The [agreed operating policies](overview.md#agreed-operating-policies) close the
+choices of record-equivalence semantics, one-hour lateness, seven-day minimal
+context, relay receipt time, the initial retry direction/defaults, and support for
+error/system destinations. The detailed ingestion proposal and the unanswered
+contracts above are not approved by those choices.

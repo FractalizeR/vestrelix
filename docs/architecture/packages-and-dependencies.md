@@ -104,6 +104,12 @@ The adapter owns the meaning and version of source progress. Durable processing
 controls whether it may be committed with the consequences of accepted records.
 An adapter cannot independently acknowledge records before that commit.
 
+Record replay protection initially uses a stable canonical content fingerprint
+with the accepted possibility of collapsing fully identical records within one
+source view. This does not merge correlation, event, or delivery identities. A
+changed field projection or fingerprint profile is a compatibility change, not an
+incidental configuration revision that resends history.
+
 Transport and log format are independent: Postfix logic can consume suitable
 records from another input without learning that input's transport. Adding an
 input changes its adapter, typed configuration, and assembly; it does not require

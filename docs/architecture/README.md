@@ -14,12 +14,17 @@ silently override requirements or close unresolved decisions.
 | [System overview](overview.md) | Approved architectural direction | Logical blocks, state ownership, transaction boundaries, guarantees, and the first scenario |
 | [Packages and dependencies](packages-and-dependencies.md) | Approved direction; technology selections are preliminary | Package responsibilities, dependency boundaries, input extensibility, and library choices |
 | [Open decisions](open-decisions.md) | Unresolved | Questions that still need an explicit decision or evidence |
-| [Ingestion](ingestion.md) | Draft; not approved | Proposed input contract, polling behavior, failures, limits, and test criteria |
+| [Ingestion](ingestion.md) | Review-ready proposal; not approved | Accepted policy inputs and proposed polling, completeness, recovery, limits, and test criteria |
 
 Approval of an architectural direction is not approval of every block's detailed
 contract, algorithm, or numerical limit. A preliminary library selection is not
 evidence of operational suitability. The ingestion draft is not an implementation
 baseline.
+
+The [agreed operating policies](overview.md#agreed-operating-policies) record
+fingerprint equivalence, time/context bounds, retry defaults, and the direction of
+error reporting. Their approval does not approve proposed read/scheduling limits
+or source-protocol acceptance tests.
 
 ## Specification boundaries
 
