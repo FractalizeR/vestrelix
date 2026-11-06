@@ -1,0 +1,108 @@
+name: Go
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '37 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    name: Detect Go source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      present: ${{ steps.detect.outputs.present }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Detect tracked Go files
+        id: detect
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+          present = bool(subprocess.check_output(['git', 'ls-files', '*.go']).strip())
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f'present={str(present).lower()}\n')
+          print('Go source detected.' if present else 'No Go source yet; application scans are not applicable.')
+          PY
+
+  checks:
+    name: Go checks
+    needs: source
+    if: needs.source.outputs.present == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Check formatting
+        run: test -z "$(gofmt -l .)"
+      - name: Test
+        run: go test -race ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Check known vulnerabilities
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+
+  codeql:
+    name: CodeQL
+    needs: source
+    if: needs.source.outputs.present == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+        with:
+          languages: go
+          build-mode: autobuild
+      - uses: github/codeql-action/autobuild@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+
+  gate:
+    name: Go security gate
+    needs: [source, checks, codeql]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require applicable Go checks
+        env:
+          SOURCE_RESULT: ${{ needs.source.result }}
+          SOURCE_PRESENT: ${{ needs.source.outputs.present }}
+          CHECKS_RESULT: ${{ needs.checks.result }}
+          CODEQL_RESULT: ${{ needs.codeql.result }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import sys
+          valid = os.environ['SOURCE_RESULT'] == 'success'
+          if os.environ['SOURCE_PRESENT'] == 'true':
+              valid = valid and os.environ['CHECKS_RESULT'] == 'success'
+              valid = valid and os.environ['CODEQL_RESULT'] == 'success'
+          elif os.environ['SOURCE_PRESENT'] != 'false':
+              valid = False
+          sys.exit(0 if valid else 1)
+          PY
