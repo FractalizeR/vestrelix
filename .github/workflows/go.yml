@@ -11,6 +11,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: go-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   source:
     name: Detect Go source
@@ -35,10 +39,20 @@ jobs:
           PY
 
   checks:
-    name: Go checks
+    name: Go checks (${{ matrix.target }})
     needs: source
     if: needs.source.outputs.present == 'true'
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux/amd64
+            runner: ubuntu-24.04
+          - target: linux/arm64
+            runner: ubuntu-24.04-arm
+          - target: darwin/arm64
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -48,14 +62,18 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
-      - name: Check formatting
-        run: test -z "$(gofmt -l .)"
-      - name: Test
-        run: go test -race ./...
-      - name: Vet
-        run: go vet ./...
-      - name: Check known vulnerabilities
-        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+      - name: Verify native target
+        env:
+          EXPECTED_TARGET: ${{ matrix.target }}
+        run: test "$(go env GOOS)/$(go env GOARCH)" = "$EXPECTED_TARGET"
+      - name: Install pinned Go linter
+        run: python3 tools/development/install_tools.py golangci-lint
+      - name: Format, module, lint, test, and build checks
+        run: make check-go
+      - name: Race detector
+        run: make test-race
+      - name: Module integrity and known vulnerabilities
+        run: make check-vuln
 
   codeql:
     name: CodeQL

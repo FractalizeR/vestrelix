@@ -15,7 +15,9 @@ scenario, extension points, and open design decisions.
 ## Development
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md). Publication checks and repository
-security tooling are available; there is no runnable application or release yet.
+security tooling are available. Run `make setup` after selecting a publication
+policy as described there, then `make check` for local validation. There is no
+runnable application or release yet.
 
 ## Security
 

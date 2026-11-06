@@ -35,8 +35,18 @@ jobs:
         run: python3 tools/publication/check.py history --public-only
 
   bootstrap-tests:
-    name: Bootstrap tests
-    runs-on: ubuntu-24.04
+    name: Tooling tests (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux/amd64
+            runner: ubuntu-24.04
+          - target: linux/arm64
+            runner: ubuntu-24.04-arm
+          - target: darwin/arm64
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,10 +55,34 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.13'
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Verify native target
+        env:
+          EXPECTED_TARGET: ${{ matrix.target }}
+        run: test "$(go env GOOS)/$(go env GOARCH)" = "$EXPECTED_TARGET"
       - name: Install pinned secret scanner
         run: python3 tools/publication/install_gitleaks.py
-      - name: Test publication safeguards with disposable repositories
-        run: python3 -m unittest discover -s tools/publication/tests -v
+      - name: Install pinned Go linter
+        run: python3 tools/development/install_tools.py golangci-lint
+      - name: Test development and publication tooling
+        run: make test-tools
+      - name: Exercise actual Go checks in disposable modules
+        run: make test-toolchain
+
+  bootstrap-gate:
+    name: Bootstrap tests
+    needs: bootstrap-tests
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require all native tooling tests
+        env:
+          MATRIX_RESULT: ${{ needs.bootstrap-tests.result }}
+        run: test "$MATRIX_RESULT" = success
 
   workflow-security:
     name: Workflow security
@@ -58,11 +92,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
-        with:
-          version: '1.32.0'
-          online-audits: false
-          advanced-security: false
+      - name: Install pinned workflow analyzers
+        run: python3 tools/development/install_tools.py actionlint zizmor
+      - name: Check workflow validity and security
+        run: make check-workflows
 
   dependency-review:
     name: Dependency review

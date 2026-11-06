@@ -1,2 +1,3 @@
 #!/bin/sh
-exec python3 tools/publication/check.py staged
+python3 tools/publication/check.py staged || exit $?
+exec python3 tools/development/check.py staged-format
