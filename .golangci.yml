@@ -1,0 +1,27 @@
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - errcheck
+    - errorlint
+    - govet
+    - ineffassign
+    - nilerr
+    - nolintlint
+    - staticcheck
+    - unused
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+  exclusions:
+    presets: []

@@ -204,6 +204,9 @@ class PublicationTests(unittest.TestCase):
         self.git("remote", "add", "origin", str(remote))
         shutil.copytree(SOURCE / "tools/publication", self.root / "tools/publication", ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copytree(SOURCE / ".githooks", self.root / ".githooks")
+        development = self.root / "tools/development"
+        development.mkdir(parents=True)
+        (development / "check.py").write_text("# Development checks are exercised by their own integration tests.\n")
         installed = self.run_check("install", "--private-policy", str(self.policy))
         self.assertEqual(installed.returncode, 0)
         self.stage()

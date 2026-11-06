@@ -1,3 +1,3 @@
 module github.com/FractalizeR/vestrelix
 
-go 1.27.0
+go 1.27.3

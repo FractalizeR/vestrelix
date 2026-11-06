@@ -1,2 +1,3 @@
 #!/bin/sh
-exec python3 tools/publication/check.py push
+python3 tools/publication/check.py push || exit $?
+exec python3 tools/development/check.py check
