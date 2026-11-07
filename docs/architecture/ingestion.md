@@ -327,8 +327,10 @@ nor alters production progress or delivery state, including job acknowledgement.
 Ingestion emits safe error classifications, not destination-specific messages.
 Processing-error opt-in and system destinations are routed by the responsible
 blocks. Repeated input failures must be coalesced/rate-limited; failure to deliver
-an error notice must not create recursive notices. Exact routing and diagnostic
-limits remain [open](open-decisions.md#resources-retention-and-operations).
+an error notice must not create recursive notices. The approved
+[routing](routing-and-formatting.md) and [operations](operations-and-observability.md)
+contracts define those limits; operational/conformance evidence remains
+[open](open-decisions.md#resources-retention-and-operations).
 
 ## VictoriaLogs completeness protocol
 

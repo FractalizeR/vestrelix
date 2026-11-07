@@ -225,16 +225,20 @@ require rewriting existing event rules. Do not build all adapters in advance.
 
 ## Decisions to resolve during design
 
-- Detailed YAML configuration and bounded expression/extraction mechanisms.
-- Fingerprint canonicalization, source-read completeness, and late-record handling
-  details for each adapter.
+- Concrete YAML fields/schema and supported operators for the approved bounded
+  condition/extraction mechanisms.
+- Canonical fingerprint encoding and adapter-specific completeness/lateness
+  evidence under the approved source-read contract.
 - Concrete enrichment bindings, recoverable definitions, and source-proof evidence
   under the approved wait/lookup/expiry contract.
-- Remaining capacity/retention limits, configurable retry-policy details, and
-  behavior at capacity.
-- Dry-run isolation and explicit history replay/reprocessing behavior.
-- Rule/configuration revisions, state compatibility, and SQLite schema migrations.
-- Safe health/readiness criteria and the initial metric/alert contract.
+- Native/resource evidence for approved capacity, retention, retry, and exhaustion
+  policies, including page/WAL amplification and safe identity retirement.
+- Evidence for approved dry-run isolation; explicit history replay/reprocessing
+  behavior remains a separate contract.
+- Concrete rule/configuration encodings, supported compatibility transitions,
+  SQLite schemas, and migration paths under the approved lifecycle policy.
+- Native health/readiness/metric behavior and concrete externally evaluated alert
+  rules under the approved operations contract; deployment thresholds need tuning.
 - Internationalized address/source-format support, context/history availability,
   and evidence for the required queue-ID lifecycle proof in the mail scenario.
 

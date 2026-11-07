@@ -74,8 +74,10 @@ updates; the durable transition contract must prevent lost updates.
 - `operations` exposes bounded operational summaries, not arbitrary business
   event dumps. Instrumentation can remain near its subject without forcing core
   blocks to depend on the endpoints package.
-  The [operations and observability proposal](operations-and-observability.md) is
-  not approved; it separates local readiness/liveness from external degradation.
+  The [operations and observability contract](operations-and-observability.md) is
+  approved; it separates local readiness/liveness from external degradation.
+  Native serving/collector behavior and concrete deployment alert rules remain
+  unverified/unimplemented.
 
 ### Persistence
 
@@ -188,7 +190,7 @@ resource use. No versions are pinned by this document.
 | SQLite driver | `modernc.org/sqlite` | Preferred for CGO-free application builds; validate resources and recovery on all targets |
 | Migrations | `github.com/pressly/goose/v3` | Embedded library use; not the all-driver CLI or a substitute for upgrade/recovery policy |
 | Rate limiting | `golang.org/x/time/rate` | In-process mechanism, not durable retry scheduling |
-| Configuration | YAML with `go.yaml.in/yaml/v4` as parser candidate | Strict loading and bounded parsing; detailed configuration contract remains open |
+| Configuration | YAML with `go.yaml.in/yaml/v4` as parser candidate | Approved strict/bounded loading policy; concrete YAML/schema/CLI and parser conformance remain pending |
 
 ### SQLite tradeoff
 
@@ -207,8 +209,9 @@ does not remove the existing C compiler requirement for race tests.
 YAML is selected for nested configuration and multiline LogsQL. Do not add another
 configuration format or Viper as an incidental dependency. Unknown fields and
 duplicate keys must be rejected, and parser errors must not expose secret-bearing
-source excerpts. Exact configuration semantics remain an
-[open block contract](open-decisions.md#configuration-and-state-compatibility).
+source excerpts. The [configuration contract](configuration-and-process-control.md)
+is approved; exact YAML/schema/CLI, encodings, and conformance remain
+[open gates](open-decisions.md#configuration-and-state-compatibility).
 
 No expression library is selected. Start from bounded declarative conditions and
 existing extraction mechanisms; a richer language needs an agreed expression and

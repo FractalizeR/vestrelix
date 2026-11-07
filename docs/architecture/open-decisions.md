@@ -51,18 +51,18 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Resource validation of approved ingestion limits; remaining SQLite, processing, rate, queue, and retention limits | Each resource-owning block |
+| Resource validation of approved block limits and concrete shared processing/page/WAL amplification accounting | Each resource-owning block |
 | Resource/format validation for approved extraction limits, single-observation boundaries, and explicit fallback behavior | Extraction and normalization |
 | Resource/source validation of approved lifecycle gates, candidate merge/terminal policy, domain matching, wait/lookup/context limits, and retention dependencies | Detection, correlation, and enrichment |
 | Resource/profile validation of approved routing snapshots, field policies, profile-owned formats, protected diagnostics, error quotas, and loop boundaries | Routing and formatting |
 | Resource/native validation of approved delivery queue, rate, concurrency, and diagnostic limits | Delivery and HTTP |
 | Native/resource validation of approved SQLite durability, writer/read limits, retention, marker retirement, reduced storage reserves, maintenance, and restore hold | SQLite state lifecycle |
-| Detailed recovery and operator actions after per-destination/global capacity exhaustion; observable expiry/removal of failed work | Delivery, processing, and SQLite state lifecycle |
-| Approval of proposed liveness/readiness/evidence meaning, metric/log contract, bounded serving, and external alert defaults | Operations and observability |
-| Native cardinality/byte/allocation/probe evidence, concrete alert rules, and deployment tuning for proposed telemetry limits | Operations and observability |
+| Concrete operator/CLI behavior and evidence for approved capacity recovery and observable expiry/removal of failed work | Delivery, processing, and SQLite state lifecycle |
+| Native/cardinality/byte/allocation/probe evidence for approved health/evidence meanings, metric/log contract, and serving limits | Operations and observability |
+| Concrete external alert rules/tests and deployment tuning under approved initial thresholds; no measured workload SLO is established | Operations and observability |
 | Detailed local inspection, auxiliary snapshot expiry/capacity accounting, and recoverable formatter definitions | Operations, routing, and SQLite state lifecycle |
 | Operational evidence for approved error/system scope, safe fields, bounded repetition, and internal/external loop prevention | Routing, delivery, and operations |
-| Local single-active-instance enforcement and supported local-storage assumptions | Process control and SQLite state lifecycle |
+| Native evidence for approved local single-active-instance enforcement, restore activation, and storage assumptions | Process control and SQLite state lifecycle |
 
 The agreed destination-capacity direction is recorded in the
 [overview](overview.md#privacy-capacity-and-operations): preserve visible
@@ -102,6 +102,8 @@ concrete migration paths, and source/domain retirement evidence remain open. The
 is also approved, with a required user/agent-facing YAML configuration schema.
 Concrete YAML fields and the complete schema artifact do not exist yet; approval
 does not establish implementation, native/profile conformance, or schema/loader
-agreement. The [operations and observability proposal](operations-and-observability.md)
-is review-ready, not approved. It does not establish implemented telemetry,
-operational alert rules, native resource behavior, or deployment SLOs.
+agreement. The [operations and observability contract](operations-and-observability.md)
+is also approved, including its initial thresholds and limits. All listed logical
+blocks now have architectural approval. This does not establish implemented
+telemetry, operational alert rules, native resource behavior, deployment SLOs, or
+implementation readiness; the concrete contracts and evidence above remain open.

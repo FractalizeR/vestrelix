@@ -1,11 +1,12 @@
 # Operations and observability
 
-**Status: review-ready proposal; not approved. Not an implementation baseline.**
+**Status: approved block contract. Not implemented or native/deployment-conformance-verified.**
 
-This block proposes health/readiness meaning, safe logs, bounded metrics, and
-signals for external alerting. Upstream approval does not approve the new probe,
-telemetry, or alert defaults here. No handlers, collectors, alert-rule files,
-application code, SQL schemas, or implementation sequence exist by this proposal.
+The project owner approved this block's health/readiness meaning, safe logs,
+bounded metrics, serving limits, and initial external alert thresholds. Approval
+does not establish native/deployment conformance or authorize application
+implementation. No handlers, collectors, alert-rule files, application code, SQL
+schemas, or implementation sequence are supplied by this contract.
 
 ## Responsibility and independent failure signals
 
@@ -31,7 +32,7 @@ These signals observe domain decisions; they do not override their safety gates.
 
 ## Probes and background evidence
 
-Propose fixed GET endpoints with small constant text responses and HTTP 200/503:
+Use fixed GET endpoints with small constant text responses and HTTP 200/503:
 
 - `/healthz`: 200 after the process-control loop is initialized and its independent
   heartbeat is fresh; 503 when it is observed stalled. Use a five-second heartbeat
@@ -55,14 +56,14 @@ confirmation, and retained-work inventory. A blocked writer must not block the
 heartbeat or probe handlers. Inventory staleness has its own signal; it is not
 by itself proof that the local processing core cannot work.
 
-Propose inventory refresh every 15 seconds through bounded owner aggregates and
+Refresh inventory every 15 seconds through bounded owner aggregates and
 short state reads, not full-store scans from each scrape. Reconstruct retained
 gauges after restart before marking them known. Shared state deadlines, read
 limits, and capacity reservations still apply. Missing inventory is unknown,
 not an empty queue; failed refresh retains the last values with an increasing age.
 
 For writable confirmation, recent successful domain commits can supply evidence.
-When otherwise idle, propose at most one low-priority control-state probe every
+When otherwise idle, use at most one low-priority control-state probe every
 30 seconds. It makes a real bounded change and commit in a constant-size control
 record, without growing history or changing source/job budgets. An empty
 transaction or unchanged-value optimization is not a write test. Use ordinary
@@ -83,7 +84,7 @@ no internal silence/acknowledgment workflow.
 
 ## Endpoint exposure and bounded serving
 
-Propose a required normal-run listener on `127.0.0.1:9818` by default. Failure to
+Use a required normal-run listener on `127.0.0.1:9818` by default. Failure to
 bind prevents worker startup rather than silently running unmonitored. Explicit
 remote exposure requires a trusted network or protected reverse proxy and an
 operator-reviewed exposure setting in the eventual configuration/schema.
@@ -97,9 +98,9 @@ methods/paths without reflecting input. Disable arbitrary access-log fields:
 request URI/query, headers, user agent, and client address are not automatic safe
 diagnostics. Any endpoint telemetry uses fixed endpoint names and closed results.
 
-Additional initial serving limits are **proposed, not approved or benchmarked**:
+Additional initial serving limits are **approved, not benchmarked**:
 
-| Setting | Initial proposal |
+| Setting | Initial value |
 | --- | --- |
 | Concurrent full metric renders | Two |
 | Complete encoded scrape response | 2 MiB |
@@ -126,8 +127,8 @@ deployment access reduce that risk; absolute probe availability is not promised.
 Use the required standard `client_golang` process and Go collectors. Application
 families have a stable `vestrelix_` prefix; environment/instance identity comes
 from external scrape labels, not a different application prefix per deployment.
-Propose the initial families below; names/types/closed enums become a versioned
-exposition contract only after approval and implementation conformance.
+The initial families below are approved; names/types/closed enums still require
+implementation conformance before a supported versioned exposition is claimed.
 
 Per-ID families cover current configured inputs, rules, and destinations only.
 Retired work remains visible in separate aggregate families rather than creating
@@ -140,7 +141,7 @@ Metric enum vocabularies are fixed by their owning contract. Unknown internal
 classes map to a closed `unknown` class where allowed, never to the original
 string. Unsupported registrations are validation errors, not silently discarded
 families. Precompute the supported configuration's maximum application series,
-including histogram buckets, sum, and count. Propose at most 5,000 application
+including histogram buckets, sum, and count. Allow at most 5,000 application
 series; native collector output also counts toward exposition/memory limits.
 The series cap alone does not prove the byte/allocation caps: both need measured
 and worst-case native conformance before the configuration is supported.
@@ -236,7 +237,7 @@ expiry/cleanup needs no operator acknowledgment to stop a reminder condition.
 | `log_records_omitted_total` | Counter / reason | Coalesced/rate-limited/queue-full/sink-failed telemetry events |
 | `metrics_render_failures_total` | Counter / reason | Saturation/timeout/size/collector/unknown failures, without error text |
 
-Propose histogram bucket boundaries of 0.005, 0.025, 0.1, 0.5, 1, 5, 15, and 60
+Use histogram bucket boundaries of 0.005, 0.025, 0.1, 0.5, 1, 5, 15, and 60
 seconds, plus the mandatory infinite bucket. Separate actual file allocation from
 logical content and usable capacity: a main file that stays large after deletion
 can have reusable pages. Missing volume/inventory evidence is unknown and stale,
@@ -244,7 +245,7 @@ not fabricated free space. Monitoring cannot remove pins to lower these gauges.
 
 ## Safe bounded structured logs
 
-Propose JSON structured logs through `log/slog` to stdout, INFO by default. Use
+Use JSON structured logs through `log/slog` to stdout, INFO by default. Use
 fixed event codes, component/stage, safe configured identifiers, closed classes,
 counts, and optionally the approved opaque diagnostic reference. That reference
 is not a capability and never a metric label. No raw exception serialization,
@@ -254,7 +255,7 @@ typed execution metadata only; content requires the approved protected offline
 inspection surface.
 
 Log lifecycle changes and bounded failure summaries, not one record per observed
-source line, successful send, retry tick, or cleanup row. Propose a single sink
+source line, successful send, retry tick, or cleanup row. Use a single sink
 writer, a 128-record/256 KiB queue, and at most 2 KiB per encoded record. Use a
 five-record/second, burst-20 global limit plus at most one repeated-summary record
 per code/component/configured scope in 30 seconds. Aggregate counts rather than
@@ -282,7 +283,8 @@ delivery. No new Alertmanager output adapter or internal threshold-based alarm
 engine is introduced. Error/system notices remain governed by the already approved
 audience, quota, and loop policies, and cannot replace independent monitoring.
 
-The following initial thresholds are **proposed**, not measured workload SLOs:
+The following initial thresholds are **approved defaults**, not measured workload
+SLOs or implemented alert rules:
 
 | Signal | Suggested external condition |
 | --- | --- |
@@ -321,7 +323,7 @@ The monitor itself needs independent operational coverage: Vestrelix cannot prov
 its own scraper/alert system is alive. Concrete rule files, messages, and threshold
 tests are required before claiming an operational alert package exists.
 
-## Proposed test criteria and evidence gates
+## Test criteria and evidence gates
 
 - Synthetic HTTP tests and controllable time distinguish startup, core stall,
   source/output outage, global storage failure, restore hold, and draining. Cached
@@ -350,7 +352,7 @@ tests are required before claiming an operational alert package exists.
   unready and reaches its one-minute critical alert without being hidden by a
   known/fresh inventory filter.
 
-These are proposed criteria, not implemented endpoints, collectors, log delivery,
+These are approved criteria, not implemented endpoints, collectors, log delivery,
 or verified alerts. Exact YAML fields and the required user/agent schema remain
 pending; this block does not create a placeholder schema or authorize application
 implementation. Native resource/serving behavior and deployment alert tuning

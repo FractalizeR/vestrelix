@@ -290,11 +290,13 @@ quota is not charged again; network rate limits and server cooldowns still apply
 
 Deduplicate operation IDs and reject stale revisions while their protection
 markers are retained. Diagnostic history eviction must not erase those markers
-or let an old command issue another budget. Exact marker lifetime, command audit
-capacity, job expiry/removal, and post-expiry deduplication are explicit
-[state-lifecycle gates](open-decisions.md#configuration-and-state-compatibility),
-not promises of unlimited history or perpetual idempotency. Do not enable requeue
-without a defined, bounded protection/retention contract. Warn that another round
+or let an old command issue another budget. The approved
+[state lifecycle contract](sqlite-state-lifecycle.md#businessterminal-identity-and-manual-operation-protection)
+defines bounded operation protection, minimum identity retention, and job expiry.
+Concrete safe-retirement/post-expiry evidence remains a
+[gate](open-decisions.md#configuration-and-state-compatibility), not a promise of
+unlimited history or perpetual idempotency. Do not enable requeue without validated
+protection/retention behavior. Warn that another round
 may duplicate a previously accepted notification, especially after ambiguous
 outcomes or expiration of the receiver's idempotency protection. There is no
 automatic periodic requeue, bulk history replay, or force-send bypass here.

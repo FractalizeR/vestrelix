@@ -21,13 +21,13 @@ silently override requirements or close unresolved decisions.
 | [Delivery and HTTP](delivery-and-http.md) | Approved block contract; implementation and transport/profile conformance pending | Attempt ownership, HTTP outcomes, retry rounds, restart, explicit requeue, limits, and test criteria |
 | [SQLite state lifecycle](sqlite-state-lifecycle.md) | Approved block contract; implementation and driver/storage conformance pending | Durability, concurrency, retention, reduced capacity defaults, automatic expiry/cleanup, migrations, backup/restore, and test criteria |
 | [Configuration and process control](configuration-and-process-control.md) | Approved block contract; implementation, concrete YAML/schema, and conformance pending | Strict settings, required user/agent schema, recovered definitions/bindings, process ownership, activation, isolated dry-run, and test criteria |
-| [Operations and observability](operations-and-observability.md) | Review-ready proposal; not approved | Liveness/readiness, safe logs, bounded metrics, external alert signals, serving limits, and test criteria |
+| [Operations and observability](operations-and-observability.md) | Approved block contract; implementation and native/deployment conformance pending | Liveness/readiness, safe logs, bounded metrics, external alert signals, serving limits, and test criteria |
 
 Approval of an architectural direction is not approval of every block's detailed
 contract, algorithm, or numerical limit. A preliminary library selection is not
 evidence of operational suitability. Ingestion, extraction, detection, routing,
-delivery, SQLite state, and configuration/process control have separate block
-approval; conformance evidence and explicitly open contracts remain outstanding.
+delivery, SQLite state, configuration/process control, and operations have separate
+block approval; conformance evidence and explicitly open contracts remain outstanding.
 
 The [agreed operating policies](overview.md#agreed-operating-policies) record
 fingerprint equivalence, time/context bounds, retry defaults, and the direction of
@@ -40,6 +40,12 @@ Detailed block specifications are reviewed and approved individually. They cover
 contracts, state, algorithms, failure handling, resource limits, security, and test
 criteria. Approval of one block does not approve the next block or authorize
 implementation.
+
+All logical blocks listed above now have architectural approval. This closes the
+block-by-block architecture discussion, not implementation readiness. Concrete
+contracts and required evidence remain tracked in [Open decisions](open-decisions.md).
+In particular, exact YAML fields and the required complete user/agent schema have
+not been produced; there is no supported configuration artifact or application yet.
 
 Open questions have one canonical description in [Open decisions](open-decisions.md).
 Topic documents describe the corresponding limits of their guarantees and link

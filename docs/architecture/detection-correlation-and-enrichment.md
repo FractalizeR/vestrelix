@@ -278,9 +278,10 @@ The following defaults are **approved, not benchmarked**:
 Count and byte limits both apply: all contexts cannot simultaneously grow to the
 per-context maximum merely because the count cap permits it. The content budget
 is not a bound on SQLite file size, indexes, event/jobs storage, or process RSS.
-The state block still needs a finite global database/capacity policy. Do not load
-the entire durable context store into memory; transient evaluation also respects
-the shared ingestion/processing allocation budget.
+The approved [state lifecycle contract](sqlite-state-lifecycle.md) defines finite
+global database/capacity policy; resource/page-amplification evidence remains
+outstanding. Do not load the entire durable context store into memory; transient
+evaluation also respects the shared ingestion/processing allocation budget.
 
 Keep decisive/ambiguity evidence rather than an ever-growing observation history.
 If retaining safe proof exceeds a limit, expose unresolved/capacity work or pause

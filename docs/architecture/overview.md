@@ -85,7 +85,7 @@ Fingerprint changes require a compatibility decision, not automatic replay.
 
 Restarting or editing a template, rule description, or configuration revision does
 not by itself create a new event identity or resend historical notifications.
-Canonicalization compatibility and business-occurrence discriminators remain
+Canonical fingerprint/occurrence-key encodings and compatibility remain
 [open](open-decisions.md#identities-and-source-coverage).
 
 ## Agreed operating policies
@@ -122,8 +122,11 @@ measured use. Driver/storage evidence remains outstanding. The
 is also approved, including offline administration, isolated dry-run, bindings,
 authority/activation, and its limits. A user/agent-facing JSON Schema for YAML is
 required; concrete fields/schema/CLI and native/profile evidence remain pending.
-The [operations and observability proposal](operations-and-observability.md) is
-not approved; its probe, metric/log, serving, and alert policies need agreement.
+The [operations and observability contract](operations-and-observability.md) is
+also approved, including its probe/evidence meanings, metric/log contract, serving
+limits, and initial external alert thresholds. Native/deployment evidence and
+concrete alert rules remain outstanding; all listed block approvals are design
+decisions, not implemented capabilities or authorization to implement.
 
 | Policy | Initial choice |
 | --- | --- |
@@ -262,7 +265,8 @@ listed in [Mail scenario decisions](open-decisions.md#mail-scenario).
 Persist minimal correlation context rather than raw logs. Record the applicable
 rule, configuration, and formatting revisions for admitted work; fix minimal
 formatted content and the applicable logical destination revision when admitting
-delivery work. Exact compatibility and change policies remain open. Secret
+delivery work. The configuration contract defines compatibility/change policy;
+concrete encodings, supported transitions, and conformance remain open. Secret
 material stays external; references alone must not allow a changed
 webhook URL to silently redirect existing jobs. An unavailable destination version
 visibly pauses affected work rather than substituting another recipient.
@@ -281,7 +285,8 @@ visible. Pending and failed work never disappears through silent cleanup.
 SQLite, memory, query duration/size, processing work, and queues are explicitly
 bounded. Retention must preserve replay protection for supported re-reading,
 including paused inputs, or require an explicit decision about losing that
-guarantee. Concrete limits and recovery policy remain
+guarantee. Block limits and recovery policy are approved; native/resource and
+safe-retirement evidence remain
 [open](open-decisions.md#resources-retention-and-operations).
 
 Expose `/metrics` through the standard Prometheus client, including process and Go
