@@ -117,9 +117,12 @@ explicit requeue, and its limits. Transport/profile conformance and state gates
 remain outstanding. The [SQLite state lifecycle contract](sqlite-state-lifecycle.md)
 is also approved, with automatic terminal expiry/cleanup, a 256 MiB main database
 ceiling, and a 384 MiB working-file budget. These are limits, not reserved disk or
-measured use. Driver/storage evidence remains outstanding. The next
-[configuration and process control block](configuration-and-process-control.md)
-is a separate unapproved proposal; its mechanisms and new limits need agreement.
+measured use. Driver/storage evidence remains outstanding. The
+[configuration and process control contract](configuration-and-process-control.md)
+is also approved, including offline administration, isolated dry-run, bindings,
+authority/activation, and its limits. A user/agent-facing JSON Schema for YAML is
+required; concrete fields/schema/CLI and native/profile evidence remain pending.
+Operations/health/metrics still require separate design and approval.
 
 | Policy | Initial choice |
 | --- | --- |

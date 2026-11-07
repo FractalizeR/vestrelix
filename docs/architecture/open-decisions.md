@@ -28,11 +28,11 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Detailed YAML model, strict parsing limits, syntax/compatibility for approved extraction precedence and fallback semantics, stable references, and bounded conditions | Configuration and detection |
-| Compatibility and transition policies for recorded rule/input/configuration/format revisions, including explicit migration/replay choices | Configuration and processing |
-| Exact dry-run isolation and explicit historical replay/reprocessing semantics | Process control and processing |
+| Concrete YAML fields and a complete version-matched offline JSON Schema, examples, supported dialect/editor association, and structural schema/loader agreement tests | Configuration and detection |
+| Concrete encodings/compiler evidence and supported transitions under approved frozen-definition/binding compatibility policy; explicit migration/replay paths | Configuration and processing |
+| Native evidence for approved offline administration/dry-run isolation; explicit historical replay/reprocessing semantics remain separate | Process control and processing |
 | Concrete schemas, supported upgrade paths, driver mechanisms, and evidence for the approved migration/backup/restore policy | SQLite state lifecycle |
-| Approval of strict configuration, recovered semantic bundles, binding continuity, authority/restore activation, offline admin, and isolated dry-run mechanisms | Configuration and process control |
+| Native/profile validation of approved strict loading, recovered semantic bundles, binding continuity, authority/restore activation, offline admin, dry-run, and limits | Configuration and process control |
 | Exact library versions, license/dependency review, resource validation, and native target checks for preliminary selections | Relevant block and development tooling |
 
 ## Delivery and HTTP
@@ -97,5 +97,8 @@ and diagnostic privacy. Transport/profile evidence remains outstanding. The
 [SQLite state lifecycle contract](sqlite-state-lifecycle.md) is approved, including
 automatic expiry/cleanup and reduced storage limits. Driver/storage validation,
 concrete migration paths, and source/domain retirement evidence remain open. The
-[configuration and process control proposal](configuration-and-process-control.md)
-is not approved and does not close its mechanism/compatibility gates.
+[configuration and process control contract](configuration-and-process-control.md)
+is also approved, with a required user/agent-facing YAML configuration schema.
+Concrete YAML fields and the complete schema artifact do not exist yet; approval
+does not establish implementation, native/profile conformance, or schema/loader
+agreement. Operations/health/metrics remain to be designed and approved.

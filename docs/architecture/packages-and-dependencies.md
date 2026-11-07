@@ -85,8 +85,10 @@ Independently committing one repository per domain cannot replace them.
 The [SQLite state lifecycle contract](sqlite-state-lifecycle.md) is approved,
 including reduced storage defaults and automatic expiry/cleanup. Native
 driver/storage validation and concrete schemas/migration paths remain outstanding.
-The [configuration and process control proposal](configuration-and-process-control.md)
-is not approved; it addresses recovered definitions, bindings, and activation.
+The [configuration and process control contract](configuration-and-process-control.md)
+is approved; it addresses recovered definitions, bindings, activation, and a
+required user/agent schema. Concrete YAML/schema/CLI and native evidence remain
+outstanding; no schema artifact or runtime support is implemented yet.
 
 Consumer blocks describe the persistence behavior they need; the backend
 implements it using subject-owned concepts. Core blocks do not import the backend

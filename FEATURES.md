@@ -60,6 +60,10 @@ identity must be distinct concepts.
 - Distinguish a successful empty result from a failed, truncated, or incomplete
   query. Do not advance progress as though incomplete data were fully processed.
 - Validate configuration before processing and provide a validation-only command.
+- Provide a version-matched JSON Schema for YAML configuration, with descriptions
+  and synthetic examples for users, editors, and agents. Support local/offline
+  structural validation and test agreement with the strict loader; keep semantic,
+  state-compatibility, and source/profile checks explicit and separate.
 - Provide a dry-run mode that evaluates rules without delivering notifications or
   acknowledging production delivery jobs.
 

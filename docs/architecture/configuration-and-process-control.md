@@ -1,16 +1,18 @@
 # Configuration and process control
 
-**Status: review-ready proposal; not approved. Not an implementation baseline.**
+**Status: approved block contract. Not implemented or native/profile-conformance-verified.**
 
-This block proposes strict configuration, recoverable semantics and bindings,
-single-process ownership, activation, and isolated evaluation. It does not approve
-application implementation, specify Go interfaces or SQL schemas, pin libraries,
-or provide an implementation sequence. YAML field names and CLI syntax still
-need a concrete specification consistent with this contract.
+The project owner approved strict configuration, recoverable semantics/bindings,
+single-process ownership, activation, isolated evaluation, and the limits below,
+and required a user/agent-facing schema for YAML configuration. Approval does not
+authorize application implementation, specify Go interfaces or SQL schemas, pin
+libraries, or provide an implementation sequence. Exact YAML fields, the complete
+schema artifact, and CLI syntax still need a concrete specification consistent
+with this contract.
 
 ## Configuration boundary and validation
 
-Propose one explicitly selected, versioned YAML document with typed settings for
+Use one explicitly selected, versioned YAML document with typed settings for
 inputs, extraction/detection profiles, rules, context-lookup bindings, routes,
 output profiles, destinations, state, and process/operations settings. Adapter
 settings belong to their declared type; portable rules do not contain arbitrary
@@ -28,7 +30,7 @@ Compile only bounded declarative conditions and the already approved restricted
 formatting/extraction mechanisms. Initial condition forms are typed comparison,
 presence/quality tests, approved domain matching, and bounded all/any/not groups;
 regular expressions use Go's bounded supported syntax, not arbitrary callbacks.
-Presence does not turn invalid/conflicting data into a valid value. Propose
+Presence does not turn invalid/conflicting data into a valid value. Use
 conservative true/false/unresolved evaluation, without error-hiding short circuits:
 
 | Condition | Result |
@@ -50,9 +52,9 @@ subset/escaping/coverage contract. Static parsing is not evidence that a source
 API supplies complete results or that a Postfix profile proves generation identity.
 Unverified profile/adapter capabilities remain activation gates.
 
-Proposed additional loading limits, **not approved or benchmarked**:
+Additional loading limits, **approved, not benchmarked**:
 
-| Setting | Initial proposal |
+| Setting | Initial value |
 | --- | --- |
 | Configuration file | 1 MiB |
 | Parsed nesting / nodes | 16 / 10,000 |
@@ -75,6 +77,45 @@ bounded collection indices. Do not echo parser excerpts, scalar values, arbitrar
 unknown keys, secret-reference contents, or complete configuration. An unknown
 key itself may contain a secret and is not automatically safe as an error path.
 
+## Schema for users, editors, and agents
+
+Provide a versioned JSON Schema describing the supported YAML configuration's
+decoded structural model. Publish it with the matching configuration/release
+version and make it usable locally without network access. Declare a JSON Schema
+dialect verified against supported validators/editor tooling; dialect and concrete
+artifact location remain part of the exact configuration specification.
+
+The schema covers all supported typed settings, adapter/profile alternatives,
+required fields, allowed values, structural bounds, and rejection of unknown
+properties at every applicable object boundary. Add useful descriptions, units,
+documented default annotations, and synthetic examples using safe external
+references, not secret-shaped values. Default annotations are documentation, not
+permission for a validator to insert settings silently.
+
+Keep schema and strict loader aligned to one reviewed configuration model.
+Whether the artifact is generated or maintained directly is not selected here;
+shared positive/negative structural fixtures must detect drift in CI. Also test
+structurally valid configurations that deliberately fail semantic checks rather
+than pretending schema validation proves full acceptance. Synthetic examples must
+pass both applicable schema and semantic validation when those exist.
+
+Schema validation does not replace duplicate-key/alias/tag rejection during YAML
+parsing, cross-reference/meaning checks, state compatibility, credential/binding
+continuity, or source/profile conformance. Bound validation work and preserve the
+same redacted error policy; raw third-party validator errors can expose values.
+Bundle necessary schema references for offline checking. A schema identifier or
+editor association does not authorize runtime fetching arbitrary remote schemas.
+
+Document editor association using supported comments or external editor settings,
+not an otherwise unknown `$schema` key in application YAML. An agent can use the
+schema, examples, and static validation to prepare settings; that does not grant
+permission to initialize state, migrate, read sources, or send notifications.
+
+No complete YAML-field contract or schema file exists yet. Produce the complete
+version-matched artifact with the concrete field specification before claiming
+configuration tooling is supported. Do not publish a permissive/partial placeholder
+as the supported schema or infer its field names from illustrative prose.
+
 ## Distinct modes and side effects
 
 | Mode | Permitted effects |
@@ -92,7 +133,7 @@ Normal run never implicitly initializes, migrates, restores, replays history, or
 grants an exhausted task another budget. Initialization is not an escape hatch for
 missing production state; replacement of an existing installation is not implicit.
 
-Propose no hot reload initially. Edited settings and rotated external references
+Use no hot reload initially. Edited settings and rotated external references
 take effect only through a controlled restart and validation. Do not interpret
 `SIGHUP` as permission to apply new settings; configuration-file changes alone do
 not mutate running clients, existing payloads, or admitted definition snapshots.
@@ -106,7 +147,7 @@ separate block, not a promise that every partial startup is ready.
 
 ## Recoverable definitions and configuration changes
 
-Propose storing minimal immutable validated semantic definitions in protected
+Store minimal immutable validated semantic definitions in protected
 SQLite, with stable logical identities, semantic-format/interpreter versions,
 dependency references, and deterministic revision digests. Admission pins the
 needed definition closure: extraction/normalization, rule/proof/lookup policy,
@@ -133,7 +174,7 @@ activation/admission rather than evicting referenced definitions. There is no
 automatic namespace reset, discard of old obligations, or unlimited revision
 archive to make every edit acceptable.
 
-| Change | Proposed behavior |
+| Change | Behavior |
 | --- | --- |
 | Display label or nonsemantic description | Does not recreate events, jobs, budgets, or source progress |
 | New route/template/allowed-field policy | Applies to newly admitted origins; already admitted candidates/jobs keep approved frozen semantics |
@@ -159,7 +200,7 @@ generic migration strategy.
 
 ## External references and actual binding continuity
 
-Propose explicit references to private files or named environment values for
+Use explicit references to private files or named environment values for
 credentials and secret target URLs. Do not embed secret URL/token values in the
 semantic snapshot or generic YAML scalar interpolation. File reads are bounded,
 ownership/access checked, and errors redacted. Resolve needed values at startup
@@ -174,7 +215,7 @@ available for frozen work. A previously admitted revision cannot be overwritten
 with new target semantics. Removing/revoking it pauses dependent work; no silent
 redirection to the current revision. Declaration is not proof of continuity.
 
-Propose an installation-local 256-bit identity key in an owner-only file outside
+Use an installation-local 256-bit identity key in an owner-only file outside
 SQLite. Initialize it explicitly once. A separate installation-bound key verifier
 in private control metadata detects wrong/missing key material even when no
 retained binding tags exist. Do not regenerate a key on startup, treat key loss
@@ -214,7 +255,7 @@ is enabled before it is charged.
 
 ## One authoritative process and state location
 
-Propose an owner-only installation control root with a persistent OS advisory
+Use an owner-only installation control root with a persistent OS advisory
 lock file. On the supported Unix targets, a lifetime-held exclusive file lock is
 the candidate mechanism. It must pass native contention/crash/path tests before
 claiming enforcement. A PID file, SQLite writer lock, or expiring heartbeat alone
@@ -228,7 +269,7 @@ are stopped or the process exits; a dead process's kernel lock is released witho
 deleting the file. Inability to establish ownership fails closed.
 
 Normal run, initialization, mutating administration, and initial inspection all
-use the same control root and exclusive ownership policy. Propose offline local
+use the same control root and exclusive ownership policy. Use offline local
 administration/inspection initially: they refuse while normal run owns the root,
 rather than commanding it to stop or introducing a public admin HTTP/IPC service.
 Static validation can run alongside production because it has no processing/state
@@ -267,7 +308,7 @@ or acknowledge external delivery reconciliation. Arbitrary whole-directory copie
 on another path/host remain an operator deployment boundary: a local manifest/
 lock is not distributed fencing or clone detection.
 
-Propose an additional 768 MiB managed offline maintenance-workspace budget, with
+Use an additional 768 MiB managed offline maintenance-workspace budget, with
 at most one inactive preserved generation and one restore candidate, including
 their WAL/temp/staging overhead. It is not extra normal-run database capacity.
 It is separate from the approved 384 MiB working budget and 1 GiB backup-area
@@ -278,7 +319,7 @@ accounting or delete the last needed original automatically to make room.
 
 ## Bounded isolated dry-run
 
-Propose a dry-run with an explicit source interval and finite operation budget.
+Use a dry-run with an explicit source interval and finite operation budget.
 It evaluates the approved source/detection/routing contracts against separate
 empty temporary state, not a production database copy containing live delivery
 jobs. It cannot acknowledge production progress/jobs, resume production tasks,
@@ -298,7 +339,7 @@ workspace counts until safely cleaned; another invocation cannot manufacture a
 fresh allowance by choosing a different workspace within that root. Copies of an
 entire installation/dry-run root are outside the local enforcement claim.
 
-Propose ten minutes and 64 physical source requests per invocation, including
+Allow ten minutes and 64 physical source requests per invocation, including
 lookups, subdivisions, and retries. Per-request time/size, candidate deadlines,
 and shared memory limits still apply; simulated work cannot receive infinite
 fresh budgets. Partial/limited/proof-unresolved results are explicit, not a claim
@@ -321,7 +362,7 @@ Already committed progress, deadlines, quotas, ownership, and cooldowns govern
 recovery; restarting does not replenish them.
 
 On `SIGTERM`/`SIGINT`, stop new reads/admissions/attempt claims first. Preserve the
-approved delivery drain of at most 20 seconds and propose a 30-second overall
+approved delivery drain of at most 20 seconds and use a 30-second overall
 process drain budget. Cancellation and final commit resolution retain ownership
 until workers stop; a timeout never declares them successfully completed. If the
 process must terminate, open work recovers under its durable interrupted-work
@@ -330,7 +371,7 @@ of clean shutdown. Do not release the root lock to another process while live
 workers remain capable of sending.
 
 Maintenance uses explicit finite operation deadlines and its own bounded staged
-artifacts/recovery evidence, not an unbounded global command framework. Propose
+artifacts/recovery evidence, not an unbounded global command framework. Allow
 ten minutes per maintenance invocation, with cancellation/unknown-outcome handling
 as in the state contract, not a guarantee of system-call return within that time.
 The approved operation-ID/64-per-job requeue protection applies to retained job
@@ -338,11 +379,15 @@ requeue only; it does not invent a job identity for init, backup, restore, or
 inspection. Interrupted initialization, migration, publication, and restore have
 their specific authority/version gates and never fall back to normal sending.
 
-## Proposed test criteria and evidence gates
+## Test criteria and evidence gates
 
 - Strict YAML tests cover duplicate/unknown keys, aliases/tags/merge/multidocument,
   oversized/deep structures, incorrect types and references, and safe diagnostics
   that do not echo unknown keys or parser excerpts.
+- A version-matched complete schema and synthetic examples support local/offline
+  validation. Shared structural fixtures catch schema/loader disagreement; semantic
+  invalidity and unsafe raw validator errors are tested separately. Editor schema
+  association does not require adding an unsupported application setting.
 - Condition truth tables preserve unresolved data under negation/grouping, field
   quality, and routing. No expression/template can reach secrets or executable
   environment/application objects.
@@ -367,7 +412,7 @@ their specific authority/version gates and never fall back to normal sending.
   finite budgets without implying successful completion or automatic restore
   activation. Workspace exhaustion refuses work without deleting protected data.
 
-These are proposed criteria, not implemented commands/tests or established native
-behavior. Exact YAML/CLI and definition/tag encodings, path/lock/authority storage
+These are approved criteria, not implemented commands/tests or established native
+behavior. Exact YAML/schema/CLI and definition/tag encodings, path/lock/authority storage
 mechanisms, supported semantic transitions, and profile conformance remain gates.
 Operations/health/metrics require their own individually approved block.
