@@ -39,11 +39,13 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Question or required evidence | Owner |
 | --- | --- |
 | Destination success criteria and permanent/transient error classification | Delivery and webhook profile |
-| Binding old jobs to destination versions, credential rotation versus recipient changes, and unavailable/revoked references | Configuration, routing, and delivery |
+| Recoverable binding mechanism and evidence for approved target continuity, credential rotation versus recipient changes, and unavailable/revoked references | Configuration, routing, and delivery |
 | Redirect policy and relation between durable attempts and physical sends, including standard HTTP transport retries | HTTP delivery |
 | Detailed retry accounting and error classification under the selected defaults, including `Retry-After` handling and queue wait versus attempt deadline | Delivery |
 | Bounded retained attempt/response diagnostics, including receiver-echoed sensitive data and limits of wire/reproduction evidence | Delivery and operations |
 | Explicit requeue budget/deadline rules and deduplication horizon after retained events/jobs expire | Delivery and processing |
+| Approval of the delivery/HTTP proposal, including first-start deadlines, attempt ownership, HTTP restrictions, cooldowns, manual rounds, queue/rate limits, and diagnostic limits | Delivery and HTTP |
+| Transport conformance for one POST exchange per charged attempt and profile-specific success/idempotency evidence, including Pachca | HTTP delivery and webhook profile |
 
 ## Resources, retention, and operations
 
@@ -52,11 +54,11 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Resource validation of approved ingestion limits; remaining SQLite, processing, rate, queue, and retention limits | Each resource-owning block |
 | Resource/format validation for approved extraction limits, single-observation boundaries, and explicit fallback behavior | Extraction and normalization |
 | Resource/source validation of approved lifecycle gates, candidate merge/terminal policy, domain matching, wait/lookup/context limits, and retention dependencies | Detection, correlation, and enrichment |
-| Approval of routing snapshots, audience/field policies, profile-owned formatting, initial JSON webhook shape, protected diagnostics, error quotas/coalescing, and loop boundaries | Routing and formatting |
+| Resource/profile validation of approved routing snapshots, field policies, profile-owned formats, protected diagnostics, error quotas, and loop boundaries | Routing and formatting |
 | Detailed recovery and operator actions after per-destination/global capacity exhaustion; observable expiry/removal of failed work | Delivery, processing, and SQLite state lifecycle |
 | Health/readiness criteria, stable metric/alert contract, and diagnostic retention | Operations |
 | Detailed local inspection, auxiliary snapshot expiry/capacity accounting, and recoverable formatter definitions | Operations, routing, and SQLite state lifecycle |
-| Destination processing-error opt-in versus system-notification scope, safe fields, bounded repetition, and recursion prevention | Routing, delivery, and operations |
+| Operational evidence for approved error/system scope, safe fields, bounded repetition, and internal/external loop prevention | Routing, delivery, and operations |
 | Local single-active-instance enforcement and supported local-storage assumptions | Process control and SQLite state lifecycle |
 
 The agreed destination-capacity direction is recorded in the
@@ -81,3 +83,9 @@ The [detection block](detection-correlation-and-enrichment.md) is approved,
 including its proof requirements, three-hour candidate deadline, lookup limits,
 domain policy, and retention dependencies. The exact supported source-generation
 proof still needs evidence; approval does not establish it.
+
+The [routing block](routing-and-formatting.md) is approved, including profile-owned
+formats, protected diagnostics, its limits, and independent error/system policies.
+It does not establish destination behavior or choose recoverable configuration
+mechanisms. The [delivery/HTTP proposal](delivery-and-http.md) remains unapproved;
+its detailed answers to the delivery questions above require separate agreement.

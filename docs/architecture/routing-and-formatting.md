@@ -1,11 +1,14 @@
 # Routing and formatting
 
-**Status: review-ready proposal; not approved. Not an implementation baseline.**
+**Status: approved block contract. Not implemented or destination-conformance-verified.**
 
 This block selects destinations and permitted fields, forms destination-specific
 messages, and supplies durable delivery assignments. It does not send requests,
 execute source queries, decide mail failures, or own network retry schedules.
-The approved detection contract does not approve the new choices below.
+The project owner approved its audience/field policies, profile-owned formats,
+protected diagnostics, error-reporting policy, and limits. Approval does not
+establish destination conformance, close configuration/state gates, or authorize
+implementation.
 
 ## Input and output contract
 
@@ -42,7 +45,7 @@ origin/destination fail validation rather than choosing the last matching route.
 
 ## Frozen definitions and destination identity
 
-Propose fixing the applicable route, template, field policy, and audience-binding
+Fix the applicable route, template, field policy, and audience-binding
 definitions when the originating candidate or notification case is first durably
 admitted. Finalization uses those definitions, not the configuration current after
 a three-hour wait. Their recoverability is required; storing revision numbers
@@ -77,7 +80,7 @@ are configuration errors. A runtime-invalid required condition is explicit
 unresolved routing, not a silent match, catch-all, or intentional no-destination
 decision.
 
-Propose separate destination capabilities, both disabled by default:
+Use separate destination capabilities, both disabled by default:
 
 | Kind | Eligibility |
 | --- | --- |
@@ -139,7 +142,7 @@ contracts; naming email as an extension does not implement or approve one.
 
 ### Initial JSON webhook profile
 
-Propose a fixed JSON structure made from literal keys, bounded objects/arrays,
+Use a fixed JSON structure made from literal keys, bounded objects/arrays,
 literal values, and references to permitted typed fields. Serialize values using
 `encoding/json`; do not build arbitrary raw JSON by interpolating source strings.
 Field names, nesting, and repeated structure come from validated configuration,
@@ -220,7 +223,7 @@ the system destination or enabling raw payloads in ordinary logs.
 
 Reuse existing job content or exactly recoverable immutable event/definition data
 instead of duplicating it unnecessarily. Where exact formatter inputs cannot
-otherwise be recovered, propose a bounded failure-only projection snapshot. This
+otherwise be recovered, retain a bounded failure-only projection snapshot. This
 is not a full event, raw-record, configuration, or network dump. It never captures
 authentication values or secret target URLs. Content remains potentially sensitive
 even though its fields were allowed for the intended destination.
@@ -246,7 +249,7 @@ missing definitions, or version incompatibility must show unavailable/incomplete
 evidence rather than promise exact reproduction. Do not preserve an entire
 execution environment for that purpose.
 
-Propose an auxiliary snapshot limit of 32 KiB per failure, a 24-hour lifetime, and
+Use an auxiliary snapshot limit of 32 KiB per failure, a 24-hour lifetime, and
 a 16 MiB aggregate content budget. These limits apply only to additional
 diagnostic copies, not the existing delivery payload, event, or pending job.
 Diagnostic expiry never deletes a delivery obligation or its content needed for
@@ -270,7 +273,7 @@ repeated log line, or routing tick. Updating the same case does not mint new not
 identities after a time window expires. The owner, not routing, establishes when
 a genuinely new failure episode exists.
 
-Propose at most six newly admitted error notices per destination in a rolling
+Admit at most six new error notices per destination in a rolling
 hour, plus at least ten minutes between admissions. The first eligible notice can
 be immediate; idle time does not accumulate a burst. The quota applies to error
 notice admission, not every HTTP retry or business notification.
@@ -304,11 +307,11 @@ verified feedback policy; no synchronous change to the observed service is
 introduced here. External metrics/alerts remain available when no system delivery
 path is functional.
 
-## Proposed limits
+## Limits
 
-The following additional defaults are **proposed, not approved or benchmarked**:
+The following additional defaults are **approved, not benchmarked**:
 
-| Setting | Initial proposal |
+| Setting | Initial value |
 | --- | --- |
 | Configured destinations | 16 |
 | Configured routes | 64 |
@@ -335,7 +338,7 @@ profile must define bounded prepared content and encoding behavior under its own
 contract. Diagnostic copies also consume the global storage budget; their small
 independent limit does not reserve unlimited disk space elsewhere.
 
-## Proposed test criteria
+## Test criteria
 
 - Projection precedes rendering; templates cannot access raw records, forbidden
   event fields, credentials, metadata objects, or undeclared references.
@@ -370,5 +373,5 @@ independent limit does not reserve unlimited disk space elsewhere.
 - Errors about error-notice formation/delivery cannot recurse, and simulated
   external notification logs cannot re-enter as new qualifying cases.
 
-Use synthetic fixtures and controlled time. These are proposed criteria, not
+Use synthetic fixtures and controlled time. These are approved criteria, not
 implemented tests, verified destination behavior, or permission to send live data.

@@ -60,13 +60,15 @@ updates; the durable transition contract must prevent lost updates.
   explicitly open contracts remain outstanding.
 - `routing` owns recipient/audience selection, field allowlists, and message
   formation from normalized events, retaining applicable formatting revisions.
-  The [routing and formatting proposal](routing-and-formatting.md) is not yet
-  approved; it defines profile-owned message formats, protected diagnostics, and
+  The approved [routing and formatting contract](routing-and-formatting.md)
+  defines profile-owned message formats, protected diagnostics, and
   the error/system notification boundary. JSON is the initial webhook body format,
   not a required representation for all output protocols.
 - `delivery` owns job identity, attempt state, bounded retry scheduling, and
   destination isolation. `delivery/webhook` performs network operations and
   classifies responses rather than running a separate hidden retry loop.
+  The [delivery and HTTP proposal](delivery-and-http.md) is not approved; its
+  transport settings and destination predicates still require conformance evidence.
 - Pachca initially remains a webhook configuration profile. A separate package
   needs actual profile-specific behavior, not merely a destination name.
 - `operations` exposes bounded operational summaries, not arbitrary business

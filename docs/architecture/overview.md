@@ -106,6 +106,14 @@ is approved as well. It defines occurrence identity, proof-gated lifecycle bindi
 a three-hour candidate deadline, bounded targeted lookups, and context dependency
 retention. Its source-proof gates are requirements, not verified deployment facts.
 
+The [routing and formatting contract](routing-and-formatting.md) is approved,
+including frozen audience/field definitions, profile-owned prepared content,
+protected local diagnostics, bounded error reporting, and its resource defaults.
+JSON belongs to the initial HTTP webhook body, not every output format. Exact
+configuration recovery and destination conformance remain evidence/design gates.
+The next [delivery and HTTP block](delivery-and-http.md) is a separate unapproved
+proposal; its queue, HTTP, and operator policies are not approved by this overview.
+
 | Policy | Initial choice |
 | --- | --- |
 | Supported log lateness | One hour; the ingestion contract defines the visibility/clock assumptions |
@@ -137,9 +145,9 @@ is not a promise about arbitrary hold, requeue, or externally delayed operations
 
 Processing failures produce safe structured logs and bounded metrics. A
 destination can opt into processing-error messages; a system destination can
-receive operational notices. These are agreed capabilities, not a finalized
-routing schema. Audience selection, safe fields, rate/deduplication limits, and
-delivery-error loop prevention require the routing/operations contracts. Metrics
+receive operational notices. Audience selection, safe fields, admission quotas,
+and notification loop boundaries are defined by the approved routing contract;
+exact configuration syntax and operational evidence remain outstanding. Metrics
 are exposed for external monitoring and alerting; no new alerting adapter is
 implied.
 
