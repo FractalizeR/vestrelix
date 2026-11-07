@@ -61,7 +61,9 @@ updates; the durable transition contract must prevent lost updates.
 - `routing` owns recipient/audience selection, field allowlists, and message
   formation from normalized events, retaining applicable formatting revisions.
   The [routing and formatting proposal](routing-and-formatting.md) is not yet
-  approved; it also defines the proposed error/system notification boundary.
+  approved; it defines profile-owned message formats, protected diagnostics, and
+  the error/system notification boundary. JSON is the initial webhook body format,
+  not a required representation for all output protocols.
 - `delivery` owns job identity, attempt state, bounded retry scheduling, and
   destination isolation. `delivery/webhook` performs network operations and
   classifies responses rather than running a separate hidden retry loop.
