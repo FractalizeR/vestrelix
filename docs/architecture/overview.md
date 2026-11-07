@@ -91,11 +91,12 @@ Canonicalization compatibility and business-occurrence discriminators remain
 ## Agreed operating policies
 
 These choices come from product decisions, not observations about a particular
-deployment. They do not approve the full draft ingestion algorithm.
+deployment. The detailed [ingestion contract](ingestion.md) has separate block
+approval; the remaining block contracts require their own agreement.
 
 | Policy | Initial choice |
 | --- | --- |
-| Supported log lateness | One hour; the ingestion draft defines the proposed visibility/clock contract |
+| Supported log lateness | One hour; the ingestion contract defines the visibility/clock assumptions |
 | Minimal message context | Seven days; expiry anchor, dependencies, and longer-lived operations require the detection/state contract |
 | Mail notification time | Receipt by the outbound relay, not the message `Date:` header or earlier submission |
 | Automatic retries | Initial attempt plus at most ten retries, subject to a one-hour wall-clock budget |

@@ -124,8 +124,9 @@ LogsQL, and the VictoriaLogs adapter does not decide Postfix business outcomes.
 
 No hypothetical file/queue/HTTP-ingestion adapters are created now. Future inputs
 need not support polling, replay, history lookup, or equal completeness guarantees.
-The [ingestion specification](ingestion.md) is still a draft, not an approved
-algorithm for this boundary.
+The [ingestion specification](ingestion.md) is an approved block contract. Its
+source conformance evidence and explicitly open compatibility contracts remain
+outstanding; approval is not authorization to implement it.
 
 ## Framework decision
 

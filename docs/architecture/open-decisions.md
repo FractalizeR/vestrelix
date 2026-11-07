@@ -9,8 +9,8 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Question or required evidence | Owner |
 | --- | --- |
 | Canonical fingerprint encoding and source-view compatibility, including field visibility, overlapping inputs, and changes to the full identity representation | Source access and ingestion |
-| Acceptance evidence for the proposed bounded-read protocol and supported VictoriaLogs API/version, including query-subset validation, mid-response errors, partial responses, and equal timestamps | VictoriaLogs input |
-| Detailed discovery/settlement behavior for the agreed one-hour lateness, observation start/backfill, outage/catch-up horizon, and source-retention assumptions | Ingestion and processing |
+| Acceptance evidence for the approved bounded-read protocol and supported VictoriaLogs API/version, including query-subset validation, mid-response errors, partial responses, and equal timestamps | VictoriaLogs input |
+| Observation-start/backfill policy, outage/catch-up horizon, and deployment evidence for the approved visibility/clock and source-retention assumptions | Ingestion and processing |
 | Stable business-occurrence discriminators distinct from correlation and source records | Detection |
 | Replay-protection lifetime and behavior when a paused input still needs old markers | Processing and SQLite state lifecycle |
 
@@ -48,7 +48,7 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Approval/validation of proposed ingestion limits; remaining SQLite, processing, rate, queue, and retention limits | Each resource-owning block |
+| Resource validation of approved ingestion limits; remaining SQLite, processing, rate, queue, and retention limits | Each resource-owning block |
 | Detailed recovery and operator actions after per-destination/global capacity exhaustion; observable expiry/removal of failed work | Delivery, processing, and SQLite state lifecycle |
 | Health/readiness criteria, stable metric/alert contract, and diagnostic retention | Operations |
 | Destination processing-error opt-in versus system-notification scope, safe fields, bounded repetition, and recursion prevention | Routing, delivery, and operations |
@@ -63,5 +63,7 @@ recovery/retention contract remain open.
 The [agreed operating policies](overview.md#agreed-operating-policies) close the
 choices of record-equivalence semantics, one-hour lateness, seven-day minimal
 context, relay receipt time, the initial retry direction/defaults, and support for
-error/system destinations. The detailed ingestion proposal and the unanswered
-contracts above are not approved by those choices.
+error/system destinations. The [ingestion block](ingestion.md) has separate
+approval for its polling protocol, fingerprint policy, lifecycle, limits, and test
+criteria. That approval does not close the unanswered contracts or establish the
+acceptance evidence above.

@@ -1,18 +1,20 @@
 # Ingestion
 
-**Status: review-ready proposal; not approved. Not an implementation baseline.**
+**Status: approved block contract. Not implemented or conformance-verified.**
 
-This proposed block specification has received a design review but has not been
-approved by the project owner. Its polling algorithms, lifecycle, and resource
-policies are proposals, not consequences of approving the overall architecture.
+The project owner approved this block's polling protocol, lifecycle, fingerprint
+policy, resource limits, and test criteria after design review. Approval does not
+authorize implementation or establish that a source satisfies the required
+conformance tests. Explicitly open encoding, compatibility, and cross-block
+contracts remain open.
 
 ## Accepted policy inputs
 
 The [agreed operating policies](overview.md#agreed-operating-policies) supply
 fingerprint equivalence, one-hour supported lateness, finite source-read retries,
-and safe error reporting. Their approval does not approve the polling protocol,
-frontiers, or additional numeric defaults proposed below. Message-context expiry
-and business correlation belong to detection/state design, not ingestion.
+and safe error reporting. This block separately approves the polling protocol,
+frontiers, and additional numeric defaults below. Message-context expiry and
+business correlation belong to detection/state design, not ingestion.
 
 ## Responsibility and boundary
 
@@ -53,7 +55,7 @@ selection at the time of reading, not the absence of future late arrivals.
 
 The accepted policy may collapse completely identical records within one source
 view. It does not promise to distinguish physically separate but indistinguishable
-records. Propose SHA-256 over a versioned, deterministic canonical representation
+records. Use SHA-256 over a versioned, deterministic canonical representation
 of the complete authorized source row, qualified by the input/source view.
 
 - Include original source content, source time, and stable source metadata.
@@ -87,9 +89,9 @@ Exact canonical encoding and view-change compatibility remain
 establish stable results across key order and restart without broadening accepted
 equivalence through lossy projection.
 
-## Proposed initial polling behavior
+## Initial polling behavior
 
-For the initial polling path, propose an all-or-nothing, bounded read unit:
+The initial polling path uses an all-or-nothing, bounded read unit:
 
 1. Obtain the committed compatible progress and reserve shared resource capacity.
 2. Select one discovery or settlement task and freeze its source view, time range,
@@ -103,11 +105,11 @@ For the initial polling path, propose an all-or-nothing, bounded read unit:
 
 The tradeoff is bounded extra memory and repeated network work after interruption,
 in exchange for avoiding a durable raw-record inbox and partially admitted failed
-reads. This is a proposed polling strategy, not the universal ingestion contract.
+reads. This is the selected polling strategy, not the universal ingestion contract.
 
 ## Discovery and late-record settlement
 
-Propose two durable coverage frontiers in the source's search-time coordinate:
+Use two durable coverage frontiers in the source's search-time coordinate:
 
 | Frontier | Meaning |
 | --- | --- |
@@ -222,12 +224,12 @@ each tick to receive a new budget. Transient failure schedules the next attempt
 with the selected backoff; permanent failure visibly blocks. Automatic budget
 exhaustion pauses the input until explicit resumption, preserving both frontiers.
 
-Propose an additional aggregate cap of 256 network requests and split depth 32 per
+Apply an additional aggregate cap of 256 network requests and split depth 32 per
 original acquisition task. Successful size probes, subdivisions, and retries all
 count toward the aggregate request cap. Transient reattempts also consume the
 shared retry counter; child tasks do not each receive ten fresh retries. Splitting
-inherits the original task's deadline and counters. These additional limits are
-proposals, not previously approved retry defaults.
+inherits the original task's deadline and counters. These additional limits belong
+to this approved block contract, alongside the shared retry defaults.
 
 The bounded split plan, current contiguous boundary, and consumed budgets must be
 durable or recoverable without replenishment. A scheduler yield or process restart
@@ -268,10 +270,10 @@ evidence that the context is absent.
 ## Limits and exhaustion behavior
 
 The retry defaults are selected in the accepted operating policies. The following
-additional initial values are **proposed, not approved or benchmarked**. They are
-configurable finite limits, not a claim about measured application resource use.
+additional initial values are **approved, not benchmarked**. They are configurable
+finite limits, not a claim about measured application resource use.
 
-| Setting | Proposed initial value |
+| Setting | Initial value |
 | --- | --- |
 | Poll interval | 30 seconds, without overlapping polls or accumulated ticks |
 | Maximum source interval per request | Five minutes |
@@ -328,7 +330,7 @@ blocks. Repeated input failures must be coalesced/rate-limited; failure to deliv
 an error notice must not create recursive notices. Exact routing and diagnostic
 limits remain [open](open-decisions.md#resources-retention-and-operations).
 
-## Proposed VictoriaLogs completeness protocol
+## VictoriaLogs completeness protocol
 
 The [querying documentation](https://docs.victoriametrics.com/victorialogs/querying/)
 describes streaming JSONL, unordered results by default, bounded result options,
@@ -336,7 +338,7 @@ and partial-response settings. `_stream_id` identifies a stream, not a unique lo
 record. A successful bounded response is not sufficient evidence of completeness
 if the query itself limits, samples, aggregates, or otherwise transforms records.
 
-For the initial polling path, propose the following deliberately narrow contract:
+The initial polling path uses the following deliberately narrow contract:
 
 1. Configure a LogsQL filter expression selecting raw source records. No
    configured pipes, query options, relative/moving time filters, subqueries, or
@@ -376,18 +378,18 @@ mid-response error signaling must pass version-specific conformance tests before
 claiming this adapter's completeness guarantee. An adapter can be refused rather
 than relaxing the contract for an unverifiable source/proxy.
 
-The filter-only restriction, sentinel protocol, and two-frontier schedule are new
-proposals. They do not imply support for arbitrary configured LogsQL. Context
+The approved filter-only restriction, sentinel protocol, and two-frontier schedule
+do not imply support for arbitrary configured LogsQL. Context
 lookups require their own approved query bindings and cannot secretly broaden the
 polling contract. No source implementation or conformance tests exist yet; the
 remaining acceptance evidence is tracked in
 [Open decisions](open-decisions.md#identities-and-source-coverage).
 
-## Proposed test criteria
+## Test criteria
 
 - Complete empty reads differ from failed, truncated, malformed, and partial reads.
 - An interrupted response after valid records produces no accepted unit effects
-  and no progress advancement under the proposed polling strategy.
+  and no progress advancement under the selected polling strategy.
 - Before/after/unknown-commit failures recover from durable state without losing
   obligations or recreating accepted events/delivery assignments.
 - Replay, out-of-order records, supported lateness edges, and unsupported lateness
