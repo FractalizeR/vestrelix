@@ -56,9 +56,12 @@ updates; the durable transition contract must prevent lost updates.
   The approved [extraction and normalization contract](extraction-and-normalization.md) covers
   its record-to-facts boundary; event/correlation contracts remain separate.
   [Detection, correlation, and enrichment](detection-correlation-and-enrichment.md)
-  is a separate, unapproved proposal for turning those facts into events.
+  is the approved contract for turning those facts into events; source proof and
+  explicitly open contracts remain outstanding.
 - `routing` owns recipient/audience selection, field allowlists, and message
   formation from normalized events, retaining applicable formatting revisions.
+  The [routing and formatting proposal](routing-and-formatting.md) is not yet
+  approved; it also defines the proposed error/system notification boundary.
 - `delivery` owns job identity, attempt state, bounded retry scheduling, and
   destination isolation. `delivery/webhook` performs network operations and
   classifies responses rather than running a separate hidden retry loop.

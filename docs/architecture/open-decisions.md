@@ -11,7 +11,7 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Canonical fingerprint encoding and source-view compatibility, including field visibility, overlapping inputs, and changes to the full identity representation | Source access and ingestion |
 | Acceptance evidence for the approved bounded-read protocol and supported VictoriaLogs API/version, including query-subset validation, mid-response errors, partial responses, and equal timestamps | VictoriaLogs input |
 | Observation-start/backfill policy, outage/catch-up horizon, and deployment evidence for the approved visibility/clock and source-retention assumptions | Ingestion and processing |
-| Stable business-occurrence discriminators distinct from correlation and source records | Detection |
+| Canonical encoding/compatibility of approved business-occurrence keys, distinct from correlation and source records | Detection |
 | Replay-protection lifetime and behavior when a paused input still needs old markers | Processing and SQLite state lifecycle |
 
 ## Mail scenario
@@ -20,9 +20,9 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | --- | --- |
 | Availability of subject, envelope data, and lifecycle evidence without changing Postfix configuration or the SMTP path | Postfix detection profile and source access |
 | Unambiguous originating-relay and queue-ID lifecycle identification, including reuse | Postfix detection profile |
-| Recipient domain/subdomain matching, supported subject charsets/folding, malformed/control/truncation outcomes, and terminal-error timing | Postfix detection profile |
-| Seven-day context expiry anchor, dependencies of pending work, minimal contents, longer-lived operations, and messages predating observation | Detection and enrichment |
-| Enrichment lookup binding, caching, wait/retry bounds, and terminal unresolved outcomes | Detection, processing, and source access |
+| Supported internationalized addresses, source subject charsets/folding, and format evidence for malformed/control/truncation outcomes | Postfix detection profile |
+| State/resource validation of approved receipt-anchored context expiry and candidate pinning; longer-lived operations and pre-observation history evidence | Detection and enrichment |
+| Concrete enrichment lookup bindings and source evidence within approved wait/request budgets | Detection, processing, and source access |
 
 ## Configuration and state compatibility
 
@@ -50,7 +50,8 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | --- | --- |
 | Resource validation of approved ingestion limits; remaining SQLite, processing, rate, queue, and retention limits | Each resource-owning block |
 | Resource/format validation for approved extraction limits, single-observation boundaries, and explicit fallback behavior | Extraction and normalization |
-| Approval of proposed lifecycle finalization gates, candidate merge/terminal policy, domain matching, wait/lookup/context limits, and retention dependencies | Detection, correlation, and enrichment |
+| Resource/source validation of approved lifecycle gates, candidate merge/terminal policy, domain matching, wait/lookup/context limits, and retention dependencies | Detection, correlation, and enrichment |
+| Approval of routing snapshots, audience/field policies, restricted JSON/text formatting, error quotas/coalescing, and loop-prevention boundaries | Routing and formatting |
 | Detailed recovery and operator actions after per-destination/global capacity exhaustion; observable expiry/removal of failed work | Delivery, processing, and SQLite state lifecycle |
 | Health/readiness criteria, stable metric/alert contract, and diagnostic retention | Operations |
 | Destination processing-error opt-in versus system-notification scope, safe fields, bounded repetition, and recursion prevention | Routing, delivery, and operations |
@@ -73,3 +74,8 @@ acceptance evidence above.
 The [extraction block](extraction-and-normalization.md) is approved with explicit
 producer fallbacks and semantic provenance. Approval does not select every source
 format/charset or close the remaining configuration and compatibility questions.
+
+The [detection block](detection-correlation-and-enrichment.md) is approved,
+including its proof requirements, three-hour candidate deadline, lookup limits,
+domain policy, and retention dependencies. The exact supported source-generation
+proof still needs evidence; approval does not establish it.

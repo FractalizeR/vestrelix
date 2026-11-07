@@ -16,12 +16,14 @@ silently override requirements or close unresolved decisions.
 | [Open decisions](open-decisions.md) | Unresolved | Questions that still need an explicit decision or evidence |
 | [Ingestion](ingestion.md) | Approved block contract; implementation and conformance pending | Input contract, polling, completeness, recovery, limits, and test criteria |
 | [Extraction and normalization](extraction-and-normalization.md) | Approved block contract; not implemented | Typed facts, explicit fallback, field quality, deterministic profiles, subject/time handling, limits, and test criteria |
-| [Detection, correlation, and enrichment](detection-correlation-and-enrichment.md) | Review-ready proposal; not approved | Lifecycle proof, occurrence identity, bounded context/waiting/lookups, finalization, retention, and test criteria |
+| [Detection, correlation, and enrichment](detection-correlation-and-enrichment.md) | Approved block contract; implementation and source proof pending | Lifecycle proof, occurrence identity, bounded context/waiting/lookups, finalization, retention, and test criteria |
+| [Routing and formatting](routing-and-formatting.md) | Review-ready proposal; not approved | Audience selection, field projection, immutable messages, error/system destinations, bounded reporting, and test criteria |
 
 Approval of an architectural direction is not approval of every block's detailed
 contract, algorithm, or numerical limit. A preliminary library selection is not
-evidence of operational suitability. Ingestion and extraction have separate block
-approval; conformance evidence and explicitly open contracts remain outstanding.
+evidence of operational suitability. Ingestion, extraction, and detection have
+separate block approval; source evidence and explicitly open contracts remain
+outstanding.
 
 The [agreed operating policies](overview.md#agreed-operating-policies) record
 fingerprint equivalence, time/context bounds, retry defaults, and the direction of

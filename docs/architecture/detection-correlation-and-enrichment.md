@@ -1,11 +1,12 @@
 # Detection, correlation, and enrichment
 
-**Status: review-ready proposal; not approved. Not an implementation baseline.**
+**Status: approved block contract. Not implemented or source-proof-verified.**
 
 This block combines normalized observations into operation context and qualifying
-business events. It proposes lifecycle proof, occurrence identity, bounded waiting,
-and enrichment policy. The approved ingestion and extraction contracts do not
-approve these new decisions.
+business events. The project owner approved its lifecycle proof requirements,
+occurrence identity, bounded waiting, enrichment, and resource policies. Approval
+does not establish source-generation proof, close explicitly open contracts, or
+authorize implementation.
 
 ## Responsibility and contracts
 
@@ -58,7 +59,7 @@ the initial mail profile must not finalize by assuming that the only generation
 currently visible is the right one. A late start record could otherwise associate
 a rejection with another message's sender or subject.
 
-Propose requiring a profile-specific proof contract before final binding:
+Require a profile-specific proof contract before final binding:
 
 1. Declare authoritative start, result, and relevant boundary evidence and ensure
    the input selection includes all required record classes for the source scope.
@@ -104,7 +105,7 @@ failure for other recipients. A proven recipient-specific final result need not
 wait for every recipient to finish or for removal, except where a boundary marker
 is necessary to prove generation membership.
 
-Propose exact domain matching by default, comparing normalized ASCII domain
+Use exact domain matching by default, comparing normalized ASCII domain
 labels without case sensitivity. Subdomain inclusion is an explicit option and
 uses label boundaries, not substring/suffix matching. Preserve local-part case and
 content; do not strip plus tags. Internationalized address/domain handling needs a
@@ -194,7 +195,7 @@ retention of event/terminal identity metadata, not an unlimited history claim.
 
 ## Bounded enrichment and waiting
 
-Propose a three-hour total candidate deadline from its first durable detection,
+Use a three-hour total candidate deadline from its first durable detection,
 including maturity waiting, source pauses, and context lookups. New facts and
 restarts do not refresh it. This is separate from each source acquisition's
 one-hour retry budget and the delivery budget of a later webhook job.
@@ -212,7 +213,7 @@ Lookup policy:
 3. Use bounded targeted windows anchored in trustworthy available evidence. Keep
    the approved five-minute request interval, row/byte/time limits, and shared
    source concurrency/buffer budgets. Do not silently widen to a seven-day query.
-4. Propose at most eight lookup rounds and 32 physical requests per candidate,
+4. Use at most eight lookup rounds and 32 physical requests per candidate,
    including subdivisions and transport retries. Candidate merging preserves the
    aggregate consumed work. A successful empty response means no matching context
    was found then, not that the source failed or the context never existed.
@@ -230,12 +231,12 @@ backfill must provide it; otherwise completion can remain unresolved within budg
 
 ## Retention, revisions, and late changes
 
-Seven days of minimal context retention is agreed. Propose its ordinary expiry
+Seven days of minimal context retention is agreed. Use its ordinary expiry
 anchor as validated relay receipt time, without extending it through source replay
-or deferred activity. This anchor and the following dependency policy are new
-decisions for this block, not implied by selecting a seven-day duration.
+or deferred activity. This anchor and the following dependency policy have separate
+block approval; they are not implied merely by selecting a seven-day duration.
 
-Distinguish retention from guarantee scope. Propose guaranteed correlation only
+Distinguish retention from guarantee scope. Guarantee correlation only
 where required context and lifecycle proof remain available under the declared
 observation/history contract. After ordinary context expiry, bounded history
 recovery may still succeed; expiry alone does not prove that recovery is impossible.
@@ -259,11 +260,11 @@ is exposed safely, not used to silently rewrite a sent notification, invent a
 new occurrence, or resend history. Any correction/reprocessing behavior needs an
 explicit operator action and its own contract.
 
-## Proposed resource limits and observability
+## Resource limits and observability
 
-The following defaults are **proposed, not approved or benchmarked**:
+The following defaults are **approved, not benchmarked**:
 
-| Setting | Initial proposal |
+| Setting | Initial value |
 | --- | --- |
 | Ordinary operation contexts | 10,000 globally |
 | Pending candidates | 1,000 globally |
@@ -294,7 +295,7 @@ error/system notifications must not contain subjects, addresses, raw diagnostics
 secret URLs, or sensitive identifiers by default. This block emits safe outcomes;
 routing/operations determines permitted notification audiences and repetition.
 
-## Proposed test criteria
+## Test criteria
 
 - Every mail condition has negative cases; local bounce, unrelated 5xx text,
   temporary failures, and expiry cannot manufacture remote rejection.
@@ -324,4 +325,4 @@ routing/operations determines permitted notification audiences and repetition.
   log mirror, sensitive labels, or unbounded memory/timer work.
 
 Use independently written synthetic fixtures and controlled time. These are
-proposed criteria, not implemented tests or verified source-generation semantics.
+approved criteria, not implemented tests or verified source-generation semantics.

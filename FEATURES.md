@@ -224,14 +224,15 @@ require rewriting existing event rules. Do not build all adapters in advance.
 - Detailed YAML configuration and bounded expression/extraction mechanisms.
 - Fingerprint canonicalization, source-read completeness, and late-record handling
   details for each adapter.
-- Enrichment lookup strategy, caching, and expiry semantics.
+- Concrete enrichment bindings, recoverable definitions, and source-proof evidence
+  under the approved wait/lookup/expiry contract.
 - Remaining capacity/retention limits, configurable retry-policy details, and
   behavior at capacity.
 - Dry-run isolation and explicit history replay/reprocessing behavior.
 - Rule/configuration revisions, state compatibility, and SQLite schema migrations.
 - Safe health/readiness criteria and the initial metric/alert contract.
-- Recipient-domain/subdomain matching, missing-subject handling, context-retention
-  boundaries, and queue-ID lifecycle discrimination for the mail scenario.
+- Internationalized address/source-format support, context/history availability,
+  and evidence for the required queue-ID lifecycle proof in the mail scenario.
 
 Changing a template or restarting the process must not silently resend historical
 events. History replay and manual retries are explicit operations, not incidental

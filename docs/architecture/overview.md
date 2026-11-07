@@ -101,6 +101,11 @@ and cross-meaning selection is opt-in with retained provenance and accurate
 labeling. A header sender does not silently satisfy the first scenario's envelope
 sender requirement, and the SMTP null reverse path is a valid present value.
 
+The [detection, correlation, and enrichment contract](detection-correlation-and-enrichment.md)
+is approved as well. It defines occurrence identity, proof-gated lifecycle binding,
+a three-hour candidate deadline, bounded targeted lookups, and context dependency
+retention. Its source-proof gates are requirements, not verified deployment facts.
+
 | Policy | Initial choice |
 | --- | --- |
 | Supported log lateness | One hour; the ingestion contract defines the visibility/clock assumptions |
