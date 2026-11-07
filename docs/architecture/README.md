@@ -19,13 +19,14 @@ silently override requirements or close unresolved decisions.
 | [Detection, correlation, and enrichment](detection-correlation-and-enrichment.md) | Approved block contract; implementation and source proof pending | Lifecycle proof, occurrence identity, bounded context/waiting/lookups, finalization, retention, and test criteria |
 | [Routing and formatting](routing-and-formatting.md) | Approved block contract; implementation and destination conformance pending | Audience/field policies, profile-owned messages, protected diagnostics, error/system destinations, and test criteria |
 | [Delivery and HTTP](delivery-and-http.md) | Approved block contract; implementation and transport/profile conformance pending | Attempt ownership, HTTP outcomes, retry rounds, restart, explicit requeue, limits, and test criteria |
-| [SQLite state lifecycle](sqlite-state-lifecycle.md) | Review-ready proposal; not approved | Durability, concurrency, retention, capacity, cleanup, migrations, backup/restore, and test criteria |
+| [SQLite state lifecycle](sqlite-state-lifecycle.md) | Approved block contract; implementation and driver/storage conformance pending | Durability, concurrency, retention, reduced capacity defaults, automatic expiry/cleanup, migrations, backup/restore, and test criteria |
+| [Configuration and process control](configuration-and-process-control.md) | Review-ready proposal; not approved | Strict settings, recovered definitions/bindings, process ownership, activation, isolated dry-run, and test criteria |
 
 Approval of an architectural direction is not approval of every block's detailed
 contract, algorithm, or numerical limit. A preliminary library selection is not
 evidence of operational suitability. Ingestion, extraction, detection, routing,
-and delivery have separate block approval; conformance evidence and explicitly
-open contracts remain outstanding.
+delivery, and SQLite state have separate block approval; conformance evidence and
+explicitly open contracts remain outstanding.
 
 The [agreed operating policies](overview.md#agreed-operating-policies) record
 fingerprint equivalence, time/context bounds, retry defaults, and the direction of

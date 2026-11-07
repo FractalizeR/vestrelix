@@ -1,12 +1,14 @@
 # SQLite state lifecycle
 
-**Status: review-ready proposal; not approved. Not an implementation baseline.**
+**Status: approved block contract. Not implemented or driver/storage-conformance-verified.**
 
-This block proposes how one local SQLite database preserves domain transitions,
+This block defines how one local SQLite database preserves domain transitions,
 bounds retained state, retires content without silently losing obligations, and
-supports maintenance and recovery. Upstream block approval does not approve its
-new retention periods, capacity limits, or maintenance policy. There is no SQL
-schema, migration implementation, Go interface, or implementation sequence here.
+supports maintenance and recovery. The project owner approved its retention,
+capacity, maintenance, and automatic-expiry policy with reduced storage defaults.
+Approval does not establish driver/storage conformance or authorize implementation.
+There is no SQL schema, migration implementation, Go interface, or implementation
+sequence here.
 
 ## Ownership and durable boundaries
 
@@ -38,7 +40,7 @@ even the failure disposition cannot be saved.
 
 ## Local storage, startup, and privacy
 
-Propose a regular local filesystem with working locking, synchronization, and
+Use a regular local filesystem with working locking, synchronization, and
 atomic file-publication behavior. Network filesystems, synchronized cloud folders,
 and access from multiple hosts are unsupported. A container needs suitable local
 persistent storage; an ephemeral filesystem does not become durable because the
@@ -57,7 +59,7 @@ database, unknown/newer format, drifted history, or corruption stops normal
 startup. Fresh initialization is explicit; never silently recreate missing state
 and start sending historical notifications again.
 
-Propose an owner-only state directory and files, equivalent to directory mode
+Use an owner-only state directory and files, equivalent to directory mode
 0700 and file mode 0600 on supported Unix targets. The boundary includes database,
 WAL/shared-memory files, temporary artifacts, diagnostic copies, and backups.
 Validate existing ownership/access rather than trusting only creation defaults.
@@ -75,7 +77,7 @@ contract, not an unrestricted configuration dump in SQLite.
 
 ## Durability, concurrency, and bounded work
 
-Propose WAL mode with `synchronous=FULL`, verified after opening every relevant
+Use WAL mode with `synchronous=FULL`, verified after opening every relevant
 connection, and enabled foreign-key enforcement. Require the supported macOS
 engine/VFS combination to honor the applicable full-sync/checkpoint full-sync
 settings; refuse to claim equivalent power-loss durability without evidence.
@@ -89,16 +91,16 @@ failure, controller cache fault, disk loss, or host compromise. A checkpoint is
 not required to make a correctly synchronized WAL commit logically durable; the
 WAL remains part of persistent state until SQLite retires it safely.
 
-Propose one serialized writer connection and at most two bounded read connections.
+Use one serialized writer connection and at most two bounded read connections.
 State-dependent decisions either run under the writer's transaction or validate
 their starting revisions there. Uniqueness of occurrence/delivery/operation
 identities and referential consistency must be enforced durably, not solely by
 in-memory checks. No executable SQL from configuration, dynamic extensions,
 cross-database atomicity through attachments, or independent adapter databases.
 
-Proposed routine-work limits:
+Approved, not benchmarked, routine-work limits:
 
-| Setting | Initial proposal |
+| Setting | Initial value |
 | --- | --- |
 | Waiting writer commands | 32, with 32 MiB aggregate retained-buffer budget |
 | Retained logical mutation content per transaction | 32 MiB |
@@ -136,11 +138,11 @@ formatter-failure snapshots remain limited to 32 KiB, 24 hours, and 16 MiB
 aggregate. Delivery attempt detail remains the latest 32 entries, at most 2 KiB
 each. None of those limits expires a live delivery obligation.
 
-Propose these additional content-retention rules:
+Use these additional content-retention rules:
 
 | State/content | Retirement eligibility |
 | --- | --- |
-| Active acquisition, candidate, delivery round, or physically unfinished attempt | Never removed merely by a storage TTL; owner must durably resolve or expire it under its existing contract |
+| Active acquisition, candidate, delivery round, or physically unfinished attempt | Never removed merely by a storage TTL; the owning program component automatically resolves/expires it under its existing contract before cleanup |
 | Successful job prepared content | Seven days after durable success, subject to remaining references |
 | Finalized normalized event content | Seven days after all assignments reach durable terminal dispositions; explicit no-destination finalization closes this condition immediately |
 | Formed undelivered job content | Thirty days after its first terminal non-delivery disposition, except a previously admitted live round pins necessary content through its budget |
@@ -166,9 +168,15 @@ necessary content remain; cleanup cannot assume that expiry was committed.
 An expired candidate does not establish mail failure, and a failed delivery does
 not become successful through retention.
 
+Ordinary deadline/budget exhaustion and later retention cleanup do not require
+operator approval. The owning program component saves the terminal outcome,
+updates safe logs/metrics and eligible bounded notices, and cleanup retires
+eligible content automatically. Explicit operator action is needed for a fresh
+retry budget or exceptional recovery, not to acknowledge each expired job.
+
 ### Record replay markers and paused inputs
 
-Propose retaining record fingerprints for at least 24 hours after durable
+Retain record fingerprints for at least 24 hours after durable
 acceptance, and longer until their compatible source-search region is below the
 committed settlement frontier and no live acquisition/uncertain transition can
 still revisit it. Pruning is conditional on the exact supported source/view
@@ -189,7 +197,7 @@ keep necessary markers; finite storage may then stop new admission.
 
 ### Business/terminal identity and manual-operation protection
 
-Propose a minimum 30-day retention for minimal occurrence, terminal-case, and
+Use a minimum 30-day retention for minimal occurrence, terminal-case, and
 delivery identity protection, anchored at the latest relevant durable terminal
 disposition or admitted manual action. Retain longer while referenced or while
 supported ordinary processing can still recreate that occurrence. Preserve only
@@ -203,7 +211,7 @@ eligibility, not a maximum history guarantee or automatic permission to resend.
 Any explicit decision to discard still-needed protection changes guarantees and
 must be observable; ordinary cleanup cannot make that decision.
 
-For manual requeue, propose at most 64 accepted operations per retained job and
+For manual requeue, allow at most 64 accepted operations per retained job and
 100,000 protected mutation results globally. Bound each operation ID to 128 bytes
 of validated non-sensitive ASCII and each retained typed result to 2 KiB. Scope
 uniqueness by operation kind, retained job identity, and operation ID; expected
@@ -225,16 +233,22 @@ Counter overflow stops the affected operation rather than wrapping protection.
 
 ## Capacity, WAL growth, and backpressure
 
-Propose the following storage defaults; they are **not approved or benchmarked**:
+The following reduced storage defaults are **approved, not benchmarked**:
 
-| Setting | Initial proposal |
+| Setting | Initial value |
 | --- | --- |
-| Main database page-count size ceiling | 4 GiB |
-| Managed working-file budget | 5 GiB for main database, WAL/shared-memory, and state temporary files |
+| Main database page-count size ceiling | 256 MiB |
+| Managed working-file budget | 384 MiB for main database, WAL/shared-memory, and state temporary files |
 | Working-family admission high-water | 90% of that budget |
-| Main-page control/completion headroom | 256 MiB inside the main-database ceiling |
-| Host-volume free-space admission floor | 512 MiB, in addition to the operation's reservation |
-| Checkpoint trigger / WAL admission stop threshold | 32 MiB / 128 MiB |
+| Main-page control/completion headroom | 32 MiB inside the main-database ceiling |
+| Host-volume free-space admission floor | 128 MiB, in addition to the operation's reservation |
+| Checkpoint trigger / WAL admission stop threshold | 8 MiB / 32 MiB |
+
+These are ceilings/admission controls, not upfront disk allocation or expected
+usage. Count limits in other blocks remain independent maxima: storage can stop
+admission well before every queue/context/operation reaches its count cap. Large
+alert volume is an observable pressure condition, not a reason to grow storage
+automatically or silently discard protection.
 
 The main page-count ceiling limits the main database, not WAL, temporary files,
 or backups. Admission checks projected page use including required indexes and
@@ -295,7 +309,7 @@ cleanup failures using bounded safe labels, not content or per-object identifier
 
 ## Migrations and integrity recovery
 
-Propose explicit offline upgrades before normal workers run. Quiesce operations,
+Use explicit offline upgrades before normal workers run. Quiesce operations,
 hold the process/state maintenance gate, verify capacity and a consistent
 pre-upgrade backup, then apply only the binary's supported forward migration path.
 The preliminary Goose selection is an executor, not proof of compatibility,
@@ -322,7 +336,7 @@ driver behavior, and native-target recovery evidence remain prerequisites.
 
 ## Consistent backups and explicit restore
 
-Propose explicit local, offline backup as the initial supported operation; no
+Use explicit local, offline backup as the initial supported operation; no
 periodic backup scheduler, cloud adapter, or promised recovery-point interval.
 Use a SQLite-supported consistent backup mechanism after quiescing workers, with
 a validated driver mechanism. Copying a live main file alone or manually
@@ -336,8 +350,8 @@ accidental image changes, not malicious modification by someone with file access
 Compatible external definitions/bindings must remain recoverable separately;
 an intact SQLite image alone is not proof of a complete system backup.
 
-Propose at most two published managed images plus one in-progress image, each
-limited to 4 GiB, within a separate 13 GiB backup-area budget including manifests
+Keep at most two published managed images plus one in-progress image, each
+limited to 256 MiB, within a separate 1 GiB backup-area budget including manifests
 and temporary overhead. The backup area may share the working volume: account
 for aggregate real free space, not independent imaginary reservations. A crashed
 staging artifact consumes the same single staging allowance until inspected and
@@ -378,7 +392,7 @@ identity as a silent fresh deduplication namespace. Arbitrary copied databases
 cannot be detected automatically; the supported restore path must enforce its
 hold and authoritative-location transition before releasing workers.
 
-## Proposed test criteria and evidence gates
+## Test criteria and evidence gates
 
 - Real temporary SQLite tests cover every common atomic boundary, cross-input
   context contention, uniqueness/reference enforcement, uncertain commits, and
@@ -390,6 +404,8 @@ hold and authoritative-location transition before releasing workers.
 - Context/candidate pins, active attempt ownership, content expiry, failed-job
   manual rounds, no-destination events, and auxiliary diagnostic TTL remain
   distinct. Cleanup races cannot delete newly referenced or still-active state.
+- Normal deadline/budget exhaustion and eligible retention cleanup complete
+  automatically with safe observability, without an operator acknowledgment.
 - Paused inputs keep unsettled replay protection. Safe frontier retirement differs
   from business identity retirement; later records for the same occurrence cannot
   resend it after a blind TTL. Unprovable retirement causes visible pressure.
@@ -408,10 +424,10 @@ hold and authoritative-location transition before releasing workers.
   original-copy activation conflicts, exhausted workspace, and failed publication
   have explicit safe outcomes, without live destinations or operational data.
 
-These are proposed acceptance criteria, not implemented tests, measured resource
+These are approved acceptance criteria, not implemented tests, measured resource
 limits, or a claim of driver/storage conformance. Configuration recovery,
 single-instance/restore activation, and concrete schemas/migration paths remain
-explicit cross-block gates; no implementation is authorized by this proposal.
+explicit cross-block gates; no implementation is authorized by this contract.
 
 ## Public references
 

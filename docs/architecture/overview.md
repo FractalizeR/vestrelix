@@ -114,9 +114,12 @@ configuration recovery and destination conformance remain evidence/design gates.
 The [delivery and HTTP contract](delivery-and-http.md) is also approved, including
 attempt ownership, first-start/retry rounds, HTTP classification, server cooldowns,
 explicit requeue, and its limits. Transport/profile conformance and state gates
-remain outstanding. The next [SQLite state lifecycle block](sqlite-state-lifecycle.md)
-is a separate unapproved proposal; its retention, capacity, and maintenance policies
-are not approved by this overview.
+remain outstanding. The [SQLite state lifecycle contract](sqlite-state-lifecycle.md)
+is also approved, with automatic terminal expiry/cleanup, a 256 MiB main database
+ceiling, and a 384 MiB working-file budget. These are limits, not reserved disk or
+measured use. Driver/storage evidence remains outstanding. The next
+[configuration and process control block](configuration-and-process-control.md)
+is a separate unapproved proposal; its mechanisms and new limits need agreement.
 
 | Policy | Initial choice |
 | --- | --- |

@@ -82,9 +82,11 @@ execution, migrations, and cleanup execution, not business policy. The required
 atomic acceptance boundaries are described in the [overview](overview.md#durable-boundaries).
 Independently committing one repository per domain cannot replace them.
 
-The [SQLite state lifecycle proposal](sqlite-state-lifecycle.md) is not approved.
-Its durability settings, retention/capacity policies, migrations, and backup/restore
-contracts require separate agreement and native driver/storage validation.
+The [SQLite state lifecycle contract](sqlite-state-lifecycle.md) is approved,
+including reduced storage defaults and automatic expiry/cleanup. Native
+driver/storage validation and concrete schemas/migration paths remain outstanding.
+The [configuration and process control proposal](configuration-and-process-control.md)
+is not approved; it addresses recovered definitions, bindings, and activation.
 
 Consumer blocks describe the persistence behavior they need; the backend
 implements it using subject-owned concepts. Core blocks do not import the backend
