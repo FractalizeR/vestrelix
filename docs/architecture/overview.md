@@ -152,6 +152,18 @@ resumption/requeue budget rules are part of the respective detailed block design
 `Retry-After` cannot be shortened into an early retry: if it cannot be honored
 within the applicable bounds and remaining budget, expose the stopped work.
 
+Configure source observation/context-loading start separately from the inclusive
+business-event notification cutoff. Earlier history may supply context without
+notifying about earlier failures; the mail cutoff uses final recipient failure
+time, not receipt or detection time. Neither boundary shifts on restart.
+
+After an outage, catch up from committed frontiers without an automatic jump to
+the present or arbitrary maximum outage duration. Delayed eligible notifications
+are allowed, subject to ordinary context/proof, capacity, and deadline constraints.
+Confirmed loss of required history blocks the affected input pending explicit
+supported recovery; unknown history remains visibly unverified. Accepting a gap
+cannot manufacture complete coverage or lifecycle proof.
+
 The retry hour is not the supported lifetime of a mail operation, source-history
 retention, or the permitted duration of every process outage. Source data must
 remain available for catch-up and late-record checks. Seven-day context retention
@@ -256,9 +268,14 @@ within the configured budget, with the same delivery identity and content.
    non-delivery rather than claiming success.
 
 The source must actually contain the required context. This architecture cannot
-recover a subject or lifecycle evidence that was never logged. Observation start,
-history availability, missing subject, and domain matching are
-listed in [Mail scenario decisions](open-decisions.md#mail-scenario).
+recover a subject or lifecycle evidence that was never logged. A
+[preliminary source inspection](detection-correlation-and-enrichment.md#preliminary-source-feasibility)
+supports field-availability feasibility, not source/lifecycle conformance. The
+initial address scope is ASCII, including ASCII punycode domain representations;
+Unicode local parts/domain forms remain unsupported without automatic conversion.
+Subject charset coverage is separate. Concrete source formats, history
+availability, and proof evidence remain
+[open](open-decisions.md#mail-scenario).
 
 ## Privacy, capacity, and operations
 

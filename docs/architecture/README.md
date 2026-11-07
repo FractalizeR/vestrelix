@@ -31,7 +31,11 @@ block approval; conformance evidence and explicitly open contracts remain outsta
 
 The [agreed operating policies](overview.md#agreed-operating-policies) record
 fingerprint equivalence, time/context bounds, retry defaults, and the direction of
-error reporting. The ingestion contract separately approves its read/scheduling
+error reporting, plus separate context-loading/notification boundaries, no-auto-skip
+outage recovery, and the initial ASCII/punycode mail address scope. An anonymized
+[source-feasibility note](detection-correlation-and-enrichment.md#preliminary-source-feasibility)
+records preliminary observations without claiming source/profile conformance.
+The ingestion contract separately approves its read/scheduling
 limits and test criteria, not the results of unimplemented source-protocol tests.
 
 ## Specification boundaries

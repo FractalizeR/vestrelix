@@ -10,7 +10,7 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | --- | --- |
 | Canonical fingerprint encoding and source-view compatibility, including field visibility, overlapping inputs, and changes to the full identity representation | Source access and ingestion |
 | Acceptance evidence for the approved bounded-read protocol and supported VictoriaLogs API/version, including query-subset validation, mid-response errors, partial responses, and equal timestamps | VictoriaLogs input |
-| Observation-start/backfill policy, outage/catch-up horizon, and deployment evidence for the approved visibility/clock and source-retention assumptions | Ingestion and processing |
+| Exact source/context-loading and business-event cutoff configuration, supported boundary changes and explicit gap-recovery operations, plus deployment evidence for source retention, visibility/clock assumptions, and catch-up capacity under the approved no-auto-skip policy | Ingestion, detection, and process control |
 | Canonical encoding/compatibility of approved business-occurrence keys, distinct from correlation and source records | Detection |
 | Source/domain evidence for approved replay-marker retirement gates and identity horizons, including paused inputs and later records for old occurrences | Processing and SQLite state lifecycle |
 
@@ -18,9 +18,9 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Availability of subject, envelope data, and lifecycle evidence without changing Postfix configuration or the SMTP path | Postfix detection profile and source access |
+| Supported profile mappings and conformance for subject/envelope/receipt data without changing Postfix or the SMTP path; preliminary source feasibility does not prove complete or unambiguous lifecycle evidence | Postfix detection profile and source access |
 | Unambiguous originating-relay and queue-ID lifecycle identification, including reuse | Postfix detection profile |
-| Supported internationalized addresses, source subject charsets/folding, and format evidence for malformed/control/truncation outcomes | Postfix detection profile |
+| Concrete address/source-format validation within the approved ASCII/punycode scope, supported subject charsets/folding, and evidence for malformed/control/truncation outcomes | Postfix detection profile |
 | State/resource validation of approved receipt-anchored context expiry and candidate pinning; longer-lived operations and pre-observation history evidence | Detection and enrichment |
 | Concrete enrichment lookup bindings and source evidence within approved wait/request budgets | Detection, processing, and source access |
 
@@ -75,7 +75,13 @@ explicit operator actions. Driver/storage and retirement evidence remain open.
 The [agreed operating policies](overview.md#agreed-operating-policies) close the
 choices of record-equivalence semantics, one-hour lateness, seven-day minimal
 context, relay receipt time, the initial retry direction/defaults, and support for
-error/system destinations. The [ingestion block](ingestion.md) has separate
+error/system destinations. Separate explicit context-loading and notification
+boundaries, no-auto-skip outage recovery with delayed eligible notifications, and
+the initial ASCII/punycode address scope are also approved. Exact configuration,
+recovery operations, source-format validation, and deployment evidence remain open.
+The [preliminary source observations](detection-correlation-and-enrichment.md#preliminary-source-feasibility)
+are anonymized feasibility notes, not closure of source/profile acceptance gates.
+The [ingestion block](ingestion.md) has separate
 approval for its polling protocol, fingerprint policy, lifecycle, limits, and test
 criteria. That approval does not close the unanswered contracts or establish the
 acceptance evidence above.

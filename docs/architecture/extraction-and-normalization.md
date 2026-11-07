@@ -159,6 +159,12 @@ attribution or parsing is ambiguous, carry an explicit unsupported/invalid quali
 instead of a positive evidence flag. Detection/correlation owns finality, domain
 allowlists, queue-ID reuse, and the event decision.
 
+The initial [mail address scope](detection-correlation-and-enrichment.md#first-mail-rule-and-event-identity)
+is ASCII, including ASCII punycode domain representations and the valid null
+reverse path. Unicode local parts/domain forms produce an explicit unsupported
+qualification, not an automatic conversion or a missing-value fallback. This
+address scope does not select subject charsets or complete source-format parsers.
+
 Raw SMTP diagnostics may be transient parser input, but the result carries only
 necessary typed evidence, not a generic raw-diagnostic field available to all
 destinations. Body, attachments, other recipients, or an entire header collection
@@ -249,6 +255,9 @@ processing duration and limit failures with bounded, non-sensitive labels.
   valid present value rather than triggering fallback.
 - Status text or an unrelated 5xx substring cannot manufacture confirmed
   remote-rejection evidence.
+- ASCII/punycode envelope address forms and the null reverse path are not confused
+  with unsupported Unicode forms; source field mapping cannot hide unsupported
+  values through conversion or fallback. Subject charsets remain independent.
 - Expected partial records differ from malformed present fields, conflicting
   producers, known unrelated classes, and unsupported expected formats.
 - Multiple independent results in one unsupported representation are not reduced

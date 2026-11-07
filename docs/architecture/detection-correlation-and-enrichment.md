@@ -88,6 +88,33 @@ required start predates supported observation/backfill cannot be connected merel
 because one queue ID is visible now. No finite sample or successful empty query
 proves that missing source history never existed.
 
+## Observation and notification boundaries
+
+Configure the source observation/context-loading start separately from the earliest
+eligible business-event time. The first boundary belongs to ingestion's source
+search coordinate; the second is an inclusive cutoff on validated business-event
+time. For the mail scenario, use the qualifying final recipient failure time, not
+relay receipt, observation, or detection time. Missing or invalid required failure
+time cannot be replaced by any of those other clocks.
+
+Earlier observations may supply receipt/context and lifecycle evidence for an
+eligible later failure. A failure before the cutoff does not create a business
+event or delivery assignment merely because it was discovered later. Operational
+and processing-error reporting remain governed by their separate policies.
+
+The operator chooses both boundaries explicitly; no automatic seven-day backfill
+or pre-observation coverage is implied. Earlier context is useful only while it
+passes ordinary retention, quality, and lifecycle requirements. Restart preserves
+the boundaries and committed progress. Changing either boundary requires an
+explicit supported compatibility/replay decision, not a silent historical resend
+or reinterpretation of already admitted work.
+
+Catch-up after an outage may discover an eligible failure long after it occurred.
+Age alone does not suppress its notification, but available context, lifecycle
+proof, normal admission limits, and deadlines still apply. Existing terminal work
+is not revived, and receipt-anchored context expiry is not extended to make an old
+event complete.
+
 ## First mail rule and event identity
 
 The first rule requires all of the following for a particular recipient:
@@ -105,11 +132,18 @@ failure for other recipients. A proven recipient-specific final result need not
 wait for every recipient to finish or for removal, except where a boundary marker
 is necessary to prove generation membership.
 
+Initially support ASCII envelope addresses, including ASCII punycode domain
+representations. Unicode local parts and Unicode-form domain names are explicitly
+unsupported, not silently converted, transliterated, or treated as a nonmatch.
+This selects an address scope, not a complete address-parser/source-format
+contract or a new IDNA normalization algorithm. Subject charset support is
+independent; non-ASCII subjects are not excluded by this address policy.
+
 Use exact domain matching by default, comparing normalized ASCII domain
 labels without case sensitivity. Subdomain inclusion is an explicit option and
 uses label boundaries, not substring/suffix matching. Preserve local-part case and
-content; do not strip plus tags. Internationalized address/domain handling needs a
-declared normalization contract, not a machine-dependent guess.
+content; do not strip plus tags. The valid SMTP null reverse path remains present
+sender context, not an unsupported or missing address.
 
 The mail occurrence key is the stable rule ID, proven operation generation,
 rejected recipient key, and event kind. It represents one permanent-remote-rejection
@@ -296,12 +330,41 @@ error/system notifications must not contain subjects, addresses, raw diagnostics
 secret URLs, or sensitive identifiers by default. This block emits safe outcomes;
 routing/operations determines permitted notification audiences and repetition.
 
+## Preliminary source feasibility
+
+An authorized, bounded, read-only inspection of a non-public source found
+subject-bearing cleanup records, envelope context, receipt evidence, and
+recipient delivery results. The sampled results included bounced outcomes both
+with and without explicit remote 5xx evidence; only the qualifying attributable
+remote rejection can satisfy the first rule.
+
+The inspection also found original and structured representations consistent with
+the same underlying observations. Representation differences may correctly yield
+different source fingerprints; this does not authorize duplicate business events
+or prove semantic deduplication. Concrete mappings and compatible lifecycle proof
+still need a supported profile contract.
+
+These are deployment-specific feasibility observations, not universal Postfix
+defaults or acceptance evidence. They do not establish complete source selection,
+unambiguous queue-ID generations, absence of subject truncation, all supported
+formats/charsets, or availability throughout the retention horizon. Do not derive
+required guarantees from a finite sample. No operational values, raw records,
+connection details, exact sampling dates/counts, or private fixtures accompany
+this note; public tests must use independently written synthetic cases.
+
 ## Test criteria
 
 - Every mail condition has negative cases; local bounce, unrelated 5xx text,
   temporary failures, and expiry cannot manufacture remote rejection.
 - Mixed recipient outcomes produce only qualifying recipient occurrences; domain
   labels, subdomain opt-in, local-part case, and address roles are not conflated.
+- ASCII/punycode addresses remain distinct from unsupported Unicode address forms;
+  no implicit conversion or missing-value fallback hides unsupported data.
+- Failure times before, exactly at, and after the notification cutoff differ as
+  specified, even when source/receipt/detection times differ. Earlier context can
+  support eligible later failures without notifying about pre-cutoff failures.
+- Restart and long-outage catch-up preserve both boundaries and existing terminal
+  work/deadlines; late discovery alone does not suppress an otherwise eligible event.
 - Repeated queue IDs across relays/generations, simultaneous starts, and late
   competing evidence never attach another message's sender or subject.
 - Conflicting valid facts across records cannot overwrite context silently or

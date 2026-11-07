@@ -182,6 +182,7 @@ archive to make every edit acceptable.
 | Suspended input/rule | Stop its new reads/admissions as appropriate; retain existing progress/work and original automatic deadlines |
 | Suspended/removed destination or revoked binding | Sending is blocked, including old jobs; selected obligations are retained, not silently changed to no-destination |
 | Source view/query scope, extraction meaning, lifecycle/correlation identity, or rule identity semantics | Block affected incompatible progress/admission until an explicit supported compatibility decision exists |
+| Source observation/context-loading start or business-event notification cutoff | Preserve committed progress and admitted semantics; no implicit backfill, skip, or historical resend; require an explicit supported compatibility/replay decision |
 | Secret rotation | Apply only after binding-continuity validation; reference name alone is insufficient |
 
 Condition/template edits cannot silently rewrite a possibly sent payload. A

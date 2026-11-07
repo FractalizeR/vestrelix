@@ -121,6 +121,13 @@ discovery. Absence of an initial start is a configuration error, not permission 
 choose an arbitrary historical replay. These frontiers are source progress, not
 business timestamps, record IDs, or proof of external delivery.
 
+This observation start is the source context-loading boundary, expressed in the
+source search-time coordinate. It is distinct from the business-event notification
+cutoff owned by [detection](detection-correlation-and-enrichment.md#observation-and-notification-boundaries).
+Reading earlier history can establish context without making its earlier failures
+eligible for business notifications. Numeric comparison of source and business
+timestamps is not proof of the required coverage relationship.
+
 1. Discovery reads a bounded next interval beginning at its committed frontier.
    A complete accepted read advances discovery and exposes events without waiting
    for the lateness hour.
@@ -244,10 +251,33 @@ budget. A response completed and validated in time may still finish durable
 acceptance afterward. Source read budgeting never licenses acknowledging data
 before that acceptance.
 
-Known source-history loss is reported as a gap when supported by evidence.
-When historical coverage cannot be verified, report that limitation instead of
-treating an empty read as proof that no records ever existed. Observation start,
-catch-up, and source-retention assumptions remain
+### Long outages and historical coverage
+
+Resume discovery and settlement at their committed compatible frontiers, not at
+the current time. There is no separate arbitrary maximum outage duration after
+which progress is automatically discarded. Catch-up remains subject to source
+history availability, finite acquisition budgets, fair scheduling, and global
+capacity. This is not a guarantee that an arbitrarily old backlog can be recovered.
+
+The original context-loading start and notification cutoff remain fixed across
+restart; committed frontiers describe subsequent progress. A long outage does not
+replenish exhausted acquisition work, revive terminal candidates, extend context
+retention, or refresh existing candidate/delivery deadlines. Newly discovered
+eligible events may produce delayed notifications only if their ordinary context,
+proof, and processing requirements can still be met.
+
+Confirmed loss of required source history blocks affected polling at committed
+progress pending explicit supported recovery. Do not automatically jump over the
+lost interval. An operator may accept a gap only through a separately specified
+supported operation; this is not an implemented command or implicit permission to
+reset progress. Accepted loss remains observable and cannot become complete
+historical coverage or evidence for otherwise unproven lifecycle membership.
+
+When historical coverage cannot be verified, retain and report that uncertainty
+instead of treating an empty read as proof that no records ever existed. Unknown
+history is not automatically confirmed loss; neither condition permits guessed
+correlation. Source retention, visibility/clock assumptions, exact recovery
+operations, and deployment coverage evidence remain
 [open](open-decisions.md#identities-and-source-coverage).
 
 Changes to source/query scope cannot silently reuse incompatible progress or
@@ -421,6 +451,13 @@ remaining acceptance evidence is tracked in
 - A supported-source conformance test covers server-side errors after output has
   begun and the documented limit behavior, not only a locally mocked happy path.
 - Source/configuration incompatibility blocks without resetting progress.
+- Context-loading start and notification cutoff remain distinct across source and
+  business clocks; restart does not move either boundary or reset committed progress.
+- Long-outage catch-up respects existing expired/exhausted work and may create
+  delayed eligible notifications without promising unavailable context or history.
+- Confirmed history loss blocks affected polling; unknown history and complete
+  empty reads cannot manufacture coverage. Any supported explicit gap acceptance
+  preserves visible loss and cannot bypass lifecycle proof.
 - History lookup cannot advance polling progress or trigger unrelated events.
 - Dry-run leaves production state unchanged; diagnostics and metric labels do
   not disclose raw records, secrets, or record identifiers.

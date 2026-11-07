@@ -50,6 +50,14 @@ identity must be distinct concepts.
   invalid values cannot silently disappear through fallback. A valid SMTP null
   reverse path is not missing sender data.
 - Persist read progress and resume after restart.
+- Configure the source observation/context-loading start separately from the
+  business-event notification cutoff. Earlier history may supply context without
+  notifying about earlier failures; restarting does not move either boundary.
+- Recover outages from committed progress without automatically skipping to the
+  present or imposing an arbitrary maximum outage duration. Delayed eligible
+  notifications remain allowed, subject to available history and ordinary limits.
+  Confirmed history loss blocks the affected input pending explicit supported
+  recovery; unverifiable history remains visibly uncertain.
 - Handle duplicate and late-arriving records through overlapping windows and
   deduplication. Define the supported lateness bound explicitly; arbitrary delays
   cannot be covered by a finite lookback window.
@@ -184,6 +192,11 @@ For a message with multiple recipients, create events only for rejected recipien
 whose domains match the allowlist. Correlation must account for the originating
 relay and the queue-ID lifecycle, including potential ID reuse.
 
+Initially support ASCII envelope addresses, including ASCII punycode domain
+representations. Unicode local parts and Unicode-form domain names are explicitly
+unsupported, without automatic conversion. This does not restrict subjects to
+ASCII or change the valid SMTP null reverse path.
+
 The notification contains only the SMTP envelope sender, the rejected SMTP
 recipient, the decoded subject, and the timestamp of receipt by the outbound
 relay. Do not include the body, attachments, other recipients, or raw SMTP
@@ -239,8 +252,9 @@ require rewriting existing event rules. Do not build all adapters in advance.
   SQLite schemas, and migration paths under the approved lifecycle policy.
 - Native health/readiness/metric behavior and concrete externally evaluated alert
   rules under the approved operations contract; deployment thresholds need tuning.
-- Internationalized address/source-format support, context/history availability,
-  and evidence for the required queue-ID lifecycle proof in the mail scenario.
+- Concrete validation/source-format evidence for the initial ASCII address scope,
+  subject charset coverage, context/history availability, and evidence for the
+  required queue-ID lifecycle proof in the mail scenario.
 
 Changing a template or restarting the process must not silently resend historical
 events. History replay and manual retries are explicit operations, not incidental
