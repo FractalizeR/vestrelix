@@ -74,6 +74,8 @@ updates; the durable transition contract must prevent lost updates.
 - `operations` exposes bounded operational summaries, not arbitrary business
   event dumps. Instrumentation can remain near its subject without forcing core
   blocks to depend on the endpoints package.
+  The [operations and observability proposal](operations-and-observability.md) is
+  not approved; it separates local readiness/liveness from external degradation.
 
 ### Persistence
 

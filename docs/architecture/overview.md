@@ -122,7 +122,8 @@ measured use. Driver/storage evidence remains outstanding. The
 is also approved, including offline administration, isolated dry-run, bindings,
 authority/activation, and its limits. A user/agent-facing JSON Schema for YAML is
 required; concrete fields/schema/CLI and native/profile evidence remain pending.
-Operations/health/metrics still require separate design and approval.
+The [operations and observability proposal](operations-and-observability.md) is
+not approved; its probe, metric/log, serving, and alert policies need agreement.
 
 | Policy | Initial choice |
 | --- | --- |

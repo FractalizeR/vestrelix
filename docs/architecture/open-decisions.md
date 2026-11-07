@@ -58,7 +58,8 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Resource/native validation of approved delivery queue, rate, concurrency, and diagnostic limits | Delivery and HTTP |
 | Native/resource validation of approved SQLite durability, writer/read limits, retention, marker retirement, reduced storage reserves, maintenance, and restore hold | SQLite state lifecycle |
 | Detailed recovery and operator actions after per-destination/global capacity exhaustion; observable expiry/removal of failed work | Delivery, processing, and SQLite state lifecycle |
-| Health/readiness criteria, stable metric/alert contract, and diagnostic retention | Operations |
+| Approval of proposed liveness/readiness/evidence meaning, metric/log contract, bounded serving, and external alert defaults | Operations and observability |
+| Native cardinality/byte/allocation/probe evidence, concrete alert rules, and deployment tuning for proposed telemetry limits | Operations and observability |
 | Detailed local inspection, auxiliary snapshot expiry/capacity accounting, and recoverable formatter definitions | Operations, routing, and SQLite state lifecycle |
 | Operational evidence for approved error/system scope, safe fields, bounded repetition, and internal/external loop prevention | Routing, delivery, and operations |
 | Local single-active-instance enforcement and supported local-storage assumptions | Process control and SQLite state lifecycle |
@@ -101,4 +102,6 @@ concrete migration paths, and source/domain retirement evidence remain open. The
 is also approved, with a required user/agent-facing YAML configuration schema.
 Concrete YAML fields and the complete schema artifact do not exist yet; approval
 does not establish implementation, native/profile conformance, or schema/loader
-agreement. Operations/health/metrics remain to be designed and approved.
+agreement. The [operations and observability proposal](operations-and-observability.md)
+is review-ready, not approved. It does not establish implemented telemetry,
+operational alert rules, native resource behavior, or deployment SLOs.
