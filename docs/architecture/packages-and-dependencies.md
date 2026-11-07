@@ -91,8 +91,9 @@ including reduced storage defaults and automatic expiry/cleanup. Native
 driver/storage validation and concrete schemas/migration paths remain outstanding.
 The [configuration and process control contract](configuration-and-process-control.md)
 is approved; it addresses recovered definitions, bindings, activation, and a
-required user/agent schema. Concrete YAML/schema/CLI and native evidence remain
-outstanding; no schema artifact or runtime support is implemented yet.
+required user/agent schema. Concrete YAML/schema, gated operator transitions,
+and native evidence remain outstanding; no schema artifact or runtime support is
+implemented yet.
 
 Consumer blocks describe the persistence behavior they need; the backend
 implements it using subject-owned concepts. Core blocks do not import the backend
@@ -190,7 +191,8 @@ resource use. No versions are pinned by this document.
 | SQLite driver | `modernc.org/sqlite` | Preferred for CGO-free application builds; validate resources and recovery on all targets |
 | Migrations | `github.com/pressly/goose/v3` | Embedded library use; not the all-driver CLI or a substitute for upgrade/recovery policy |
 | Rate limiting | `golang.org/x/time/rate` | In-process mechanism, not durable retry scheduling |
-| Configuration | YAML with `go.yaml.in/yaml/v4` as parser candidate | Approved strict/bounded loading policy; concrete YAML/schema/CLI and parser conformance remain pending |
+| Configuration | YAML with `go.yaml.in/yaml/v4` as parser candidate | Approved strict/bounded loading policy; concrete YAML/schema and parser conformance remain pending |
+| Canonical identity/definition envelopes | Core Deterministic CBOR with `github.com/fxamacker/cbor/v2` as encoder candidate | Selected C1 value/envelope contract; version/license/resource/decoder review and concrete definition AST bodies remain pending |
 
 ### SQLite tradeoff
 
@@ -210,7 +212,8 @@ YAML is selected for nested configuration and multiline LogsQL. Do not add anoth
 configuration format or Viper as an incidental dependency. Unknown fields and
 duplicate keys must be rejected, and parser errors must not expose secret-bearing
 source excerpts. The [configuration contract](configuration-and-process-control.md)
-is approved; exact YAML/schema/CLI, encodings, and conformance remain
+is approved; exact YAML/schema, definition AST bodies, gated operator transitions,
+and conformance remain
 [open gates](open-decisions.md#configuration-and-state-compatibility).
 
 No expression library is selected. Start from bounded declarative conditions and

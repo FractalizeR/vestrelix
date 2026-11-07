@@ -84,8 +84,9 @@ timestamp is neither a substitute fingerprint nor a safe pagination cursor.
 Source-hidden fields cannot distinguish records in the authorized view; that
 boundary must be declared rather than described as physical-record uniqueness.
 
-Exact canonical encoding and view-change compatibility remain
-[open contracts](open-decisions.md#identities-and-source-coverage). The tests must
+[C1 envelopes](identity-and-definition-encoding.md#record-fingerprint) select the
+canonical bytes; encoder/API conformance and view-change compatibility remain
+[open gates](open-decisions.md#identities-and-source-coverage). The tests must
 establish stable results across key order and restart without broadening accepted
 equivalence through lossy projection.
 

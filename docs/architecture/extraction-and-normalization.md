@@ -186,8 +186,46 @@ or ISO-8859-1. Subject support is independent of the ASCII envelope-address scop
 Use a fixed, reviewed table of canonical charset names and accepted standard
 aliases; do not inherit every label accepted by a decoder library. Do not guess
 encodings, consult the host locale, or reinterpret undecodable bytes using a
-different charset. The concrete alias table and decoder conformance remain
-profile-specification gates, not implemented capabilities.
+different charset. Match the following closed table using ASCII case-insensitive
+comparison, without trimming or punctuation rewriting:
+
+| Canonical charset | Additional accepted labels |
+| --- | --- |
+| UTF-8 | `csUTF8` |
+| US-ASCII | `iso-ir-6`, `ISO646-US`, `us`, `IBM367`, `cp367`, `csASCII` |
+| Windows-1251 | `cswindows1251` |
+| KOI8-R | `csKOI8R` |
+| KOI8-U | `csKOI8U` |
+| ISO-8859-5 | `iso-ir-144`, `ISO_8859-5`, `cyrillic`, `csISOLatinCyrillic` |
+| ISO-8859-1 | `iso-ir-100`, `ISO_8859-1`, `latin1`, `l1`, `IBM819`, `CP819`, `csISOLatin1` |
+
+These are selected IANA names/aliases that also satisfy RFC 2047's charset-token
+syntax. Registered names containing a dot or colon are not accepted inside an
+encoded word. Common decoder extensions such as `utf8` and `cp1251`, language
+suffixes, and future registry additions are not implicitly added to this table.
+Changing the table is a versioned profile/compatibility change.
+
+Accept only the case-insensitive `B` and `Q` encoded-word forms. Each word is at
+most 75 ASCII characters including delimiters; its encoded text is nonempty and
+contains no literal whitespace or question mark. Validate standard base64
+alphabet, placement/padding, and unused trailing bits before `B` decoding. In
+`Q`, underscore means space and an equals sign requires two hexadecimal digits;
+both uppercase and lowercase hex digits are accepted. Do not borrow base64url or
+body quoted-printable's soft-line-break behavior.
+
+Decode every word independently under its declared charset. Incomplete multibyte
+characters cannot be repaired by concatenating bytes from another word. Ignore
+only the permitted linear whitespace between adjacent encoded words; preserve
+ordinary text spacing and require valid boundaries between words and plain text.
+Header folding must first pass the declared source-format contract. An unfolded
+log value does not establish the original wire header's line lengths. An encoded
+word introducer that cannot be parsed under this subset is an explicit invalid
+or unsupported fact, not an excuse to forward its undecoded spelling.
+
+US-ASCII rejects bytes above 127; UTF-8 requires valid scalar sequences. Legacy
+single-byte decoding rejects undefined code points rather than replacing them
+(including Windows-1251 byte `0x98`). All decoded text still passes the control
+character and total-size checks below. Library leniency is not validation.
 
 Validate the decoded display value as well as the source representation. Reject
 remaining CR, LF, NUL, and other control characters rather than silently
@@ -202,7 +240,7 @@ characters. A forgiving library decoder is not proof that malformed-looking inpu
 is valid: the supported cases and failure behavior require tests. Unsupported or
 invalid subject facts cannot satisfy required decoded context; detection/enrichment
 owns waiting and final unresolved outcomes under the existing fallback policy.
-Concrete alias/source-format coverage, decoder evidence, and any additional
+Source-format coverage, decoder evidence, and any additional
 decoding dependency remain
 [open](open-decisions.md#mail-scenario).
 
@@ -285,6 +323,9 @@ processing duration and limit failures with bounded, non-sensitive labels.
   mixed encoded words remain valid only when every part passes its declared
   charset and syntax checks. Unsupported labels, host-locale differences, and
   decoder leniency cannot broaden the accepted table or hide invalid bytes.
+- Cases distinguish permitted inter-word whitespace from forbidden intra-word
+  whitespace, 75-character boundaries, lowercase Q hex digits, invalid base64
+  padding/trailing bits, split multibyte characters, and undefined legacy bytes.
 - Pattern, field, record, output, and expansion limits fail explicitly without
   clipping, uncontrolled allocation, or retained per-record caches.
 - Configuration rejects unsupported profiles, invalid producer relationships,
@@ -298,3 +339,11 @@ processing duration and limit failures with bounded, non-sensitive labels.
 Use independently written synthetic fixtures and reserved example domains. No
 private deployment configuration, logs, or parser implementation is a source for
 public fixtures. These are approved acceptance criteria, not implemented tests.
+
+## Public references
+
+- [RFC 2047 encoded-word syntax and interpretation](https://www.rfc-editor.org/rfc/rfc2047.html)
+- [IANA character set names and aliases](https://www.iana.org/assignments/character-sets/character-sets.xhtml)
+
+The selected table is fixed by this profile, not fetched at runtime. These
+references do not establish decoder or deployment-source conformance.

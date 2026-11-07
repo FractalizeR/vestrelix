@@ -240,16 +240,17 @@ require rewriting existing event rules. Do not build all adapters in advance.
 
 - Concrete YAML fields/schema and supported operators for the approved bounded
   condition/extraction mechanisms.
-- Canonical fingerprint encoding and adapter-specific completeness/lateness
-  evidence under the approved source-read contract.
+- Encoder/source-view compatibility and adapter-specific completeness/lateness
+  evidence under the selected fingerprint envelopes and approved source-read contract.
 - Concrete enrichment bindings, recoverable definitions, and source-proof evidence
   under the approved wait/lookup/expiry contract.
 - Native/resource evidence for approved capacity, retention, retry, and exhaustion
   policies, including page/WAL amplification and safe identity retirement.
 - Evidence for approved dry-run isolation; explicit history replay/reprocessing
   behavior remains a separate contract.
-- Concrete rule/configuration encodings, supported compatibility transitions,
-  SQLite schemas, and migration paths under the approved lifecycle policy.
+- Concrete rule/configuration AST bodies, encoder/compiler conformance, gated
+  compatibility/replay/recovery transitions, SQLite schemas, and migration paths
+  under the selected encoding/operator specifications and approved lifecycle policy.
 - Native health/readiness/metric behavior and concrete externally evaluated alert
   rules under the approved operations contract; deployment thresholds need tuning.
 - Concrete validation/source-format evidence for the initial ASCII address scope,

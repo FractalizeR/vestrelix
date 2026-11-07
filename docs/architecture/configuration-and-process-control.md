@@ -6,9 +6,11 @@ The project owner approved strict configuration, recoverable semantics/bindings,
 single-process ownership, activation, isolated evaluation, and the limits below,
 and required a user/agent-facing schema for YAML configuration. Approval does not
 authorize application implementation, specify Go interfaces or SQL schemas, pin
-libraries, or provide an implementation sequence. Exact YAML fields, the complete
-schema artifact, and CLI syntax still need a concrete specification consistent
-with this contract.
+libraries, or provide an implementation sequence. The initial
+[CLI and narrow compatibility decisions](operator-and-compatibility-contract.md)
+and [encoding envelopes](identity-and-definition-encoding.md) have selected
+technical specifications. Exact YAML fields, the complete schema artifact,
+definition AST bodies, and explicitly gated recovery operations remain pending.
 
 ## Configuration boundary and validation
 
@@ -158,8 +160,9 @@ them; no acknowledged work depends solely on a replaced configuration file.
 Store validated nonsecret semantic data, not a full YAML, environment, client, or
 credential dump. Nonsecret does not mean public: a query literal or field policy
 can still contain private deployment information. Exact versioned canonical
-encoding and compiler compatibility need evidence before digest comparisons are
-used. Formatting/key-order differences are not new business identities, and a
+encoding follows the [C1 envelopes](identity-and-definition-encoding.md);
+concrete AST bodies and compiler compatibility need evidence before digest
+comparisons are used. Formatting/key-order differences are not new business identities, and a
 digest match is not independent proof of semantic correctness or source coverage.
 
 An executable retained definition requires a supported interpreter/profile
@@ -248,8 +251,9 @@ and acquisition progress remain owned by ingestion, not an HMAC namespace.
 
 HMAC evidence checks local binding continuity without storing opaque secrets in
 SQLite; it does not prove a receiver's behavior, server-side audience stability,
-credential validity, or source completeness. Exact tag encoding, resolver tests,
-and profile-specific rotation evidence remain conformance gates. Startup validates
+credential validity, or source completeness. Conformance of selected
+[C1 tag envelopes](identity-and-definition-encoding.md#binding-evidence-and-installation-key-verifier),
+resolver continuity, and profile-specific rotation evidence remain gates. Startup validates
 retained evidence against the resolved revision before dependent work can run;
 each attempt still checks that the same authorized immutable resolver generation
 is enabled before it is charged.
@@ -414,6 +418,8 @@ their specific authority/version gates and never fall back to normal sending.
   activation. Workspace exhaustion refuses work without deleting protected data.
 
 These are approved criteria, not implemented commands/tests or established native
-behavior. Exact YAML/schema/CLI and definition/tag encodings, path/lock/authority storage
-mechanisms, supported semantic transitions, and profile conformance remain gates.
+behavior. Exact YAML/schema, definition AST bodies, encoding/compiler conformance,
+path/lock/authority storage mechanisms, gated semantic/recovery transitions, and
+profile conformance remain gates. Selected initial CLI syntax does not implement
+or approve the remaining gated operations.
 Operations/health/metrics require their own individually approved block.

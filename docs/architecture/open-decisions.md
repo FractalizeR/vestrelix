@@ -8,10 +8,10 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Canonical fingerprint encoding and source-view compatibility, including field visibility, overlapping inputs, and changes to the full identity representation | Source access and ingestion |
+| Encoder/source-version conformance for selected C1 record envelopes and source-view compatibility, including field visibility, overlapping inputs, and representation changes | Source access and ingestion |
 | Acceptance evidence for the approved bounded-read protocol and supported VictoriaLogs API/version, including query-subset validation, mid-response errors, partial responses, and equal timestamps | VictoriaLogs input |
 | Exact source/context-loading and business-event cutoff configuration, supported boundary changes and explicit gap-recovery operations, plus deployment evidence for source retention, visibility/clock assumptions, and catch-up capacity under the approved no-auto-skip policy | Ingestion, detection, and process control |
-| Canonical encoding/compatibility of approved business-occurrence keys, distinct from correlation and source records | Detection |
+| Source/parser/compiler conformance for selected C1 occurrence/delivery envelopes and supported identity transitions, distinct from correlation and source records | Detection |
 | Source/domain evidence for approved replay-marker retirement gates and identity horizons, including paused inputs and later records for old occurrences | Processing and SQLite state lifecycle |
 
 ## Mail scenario
@@ -20,7 +20,7 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | --- | --- |
 | Supported profile mappings and conformance for subject/envelope/receipt data without changing Postfix or the SMTP path; preliminary source feasibility does not prove complete or unambiguous lifecycle evidence | Postfix detection profile and source access |
 | Unambiguous originating-relay and queue-ID lifecycle identification, including reuse | Postfix detection profile |
-| Concrete address/source-format validation within the approved ASCII/punycode scope, the fixed alias table and decoder/dependency evidence for approved subject charsets, supported source folding, and malformed/control/truncation outcomes | Postfix detection profile |
+| Concrete address/source-format validation within the approved ASCII/punycode scope, decoder/dependency conformance for the fixed subject charset/alias table, supported source folding, and malformed/control/truncation outcomes | Postfix detection profile |
 | State/resource validation of approved receipt-anchored context expiry and candidate pinning; longer-lived operations and pre-observation history evidence | Detection and enrichment |
 | Concrete enrichment lookup bindings and source evidence within approved wait/request budgets | Detection, processing, and source access |
 
@@ -29,10 +29,11 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Question or required evidence | Owner |
 | --- | --- |
 | Concrete YAML fields and a complete version-matched offline JSON Schema, examples, supported dialect/editor association, and structural schema/loader agreement tests | Configuration and detection |
-| Concrete encodings/compiler evidence and supported transitions under approved frozen-definition/binding compatibility policy; explicit migration/replay paths | Configuration and processing |
+| Concrete typed definition AST bodies and encoder/compiler evidence for C1 envelopes; conformance of the selected narrow compatibility matrix; gated migration/replay/boundary transitions | Configuration and processing |
 | Native evidence for approved offline administration/dry-run isolation; explicit historical replay/reprocessing semantics remain separate | Process control and processing |
 | Concrete schemas, supported upgrade paths, driver mechanisms, and evidence for the approved migration/backup/restore policy | SQLite state lifecycle |
 | Native/profile validation of approved strict loading, recovered semantic bundles, binding continuity, authority/restore activation, offline admin, dry-run, and limits | Configuration and process control |
+| Exact gap-acceptance and restore-reconciliation inputs/recovery evidence, supported boundary/identity changes, and conformance of selected CLI/inspection/resume/requeue behavior | Process control, ingestion, and SQLite state lifecycle |
 | Exact library versions, license/dependency review, resource validation, and native target checks for preliminary selections | Relevant block and development tooling |
 
 ## Delivery and HTTP
@@ -57,7 +58,7 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Resource/profile validation of approved routing snapshots, field policies, profile-owned formats, protected diagnostics, error quotas, and loop boundaries | Routing and formatting |
 | Resource/native validation of approved delivery queue, rate, concurrency, and diagnostic limits | Delivery and HTTP |
 | Native/resource validation of approved SQLite durability, writer/read limits, retention, marker retirement, reduced storage reserves, maintenance, and restore hold | SQLite state lifecycle |
-| Concrete operator/CLI behavior and evidence for approved capacity recovery and observable expiry/removal of failed work | Delivery, processing, and SQLite state lifecycle |
+| Native/state evidence for selected operator/CLI behavior and approved capacity recovery/observable expiry; exact explicitly gated recovery paths remain outstanding | Delivery, processing, and SQLite state lifecycle |
 | Native/cardinality/byte/allocation/probe evidence for approved health/evidence meanings, metric/log contract, and serving limits | Operations and observability |
 | Concrete external alert rules/tests and deployment tuning under approved initial thresholds; no measured workload SLO is established | Operations and observability |
 | Detailed local inspection, auxiliary snapshot expiry/capacity accounting, and recoverable formatter definitions | Operations, routing, and SQLite state lifecycle |
@@ -80,8 +81,12 @@ boundaries, no-auto-skip outage recovery with delayed eligible notifications, an
 the initial ASCII/punycode address scope are also approved. Exact configuration,
 recovery operations, source-format validation, and deployment evidence remain open.
 The [subject charset scope](extraction-and-normalization.md#subject-and-time-handling)
-is approved separately from addresses; concrete aliases, source-format/decoder
-conformance, and dependency review remain open.
+is approved separately from addresses. Its fixed alias table and strict word
+syntax are selected; source-format/decoder conformance and dependency review remain open.
+The [C1 encoding envelopes](identity-and-definition-encoding.md) and
+[initial operator/compatibility specification](operator-and-compatibility-contract.md)
+record delegated technical choices. They do not supply concrete definition AST
+bodies, implementations, or evidence for their explicitly gated transitions.
 The [preliminary source observations](detection-correlation-and-enrichment.md#preliminary-source-feasibility)
 are anonymized feasibility notes, not closure of source/profile acceptance gates.
 The [ingestion block](ingestion.md) has separate

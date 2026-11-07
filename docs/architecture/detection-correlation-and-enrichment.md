@@ -352,6 +352,31 @@ required guarantees from a finite sample. No operational values, raw records,
 connection details, exact sampling dates/counts, or private fixtures accompany
 this note; public tests must use independently written synthetic cases.
 
+### Public upstream constraints, not deployment conclusions
+
+The Postfix `postqueue(1)` documentation explicitly permits queue-ID reuse unless
+long IDs are enabled and time is monotonic; even then, IDs are not globally unique
+across Postfix instances. A hostname label alone is not evidence that a selected
+source contains only one independently managed queue. The profile must establish
+the originating-instance namespace and its authoritative start/coverage contract;
+neither short nor long ID syntax bypasses that gate.
+
+In the pinned upstream `cleanup_message.c` logging path, `cleanup_act_log`
+formats the matched header/body content using `%.200s` before appending context.
+This bound concerns that action-logging path, not every possible subject producer
+or every deployed version. It can discard a subject suffix without an explicit
+ellipsis, including part of an encoded word. A complete JSON record and closing
+log-context trailer therefore do not prove a complete subject.
+
+A supported source/profile must establish the selected producer's bounds and
+transformations. Values reaching a known content limit are potentially truncated
+even when syntactically decodable; classify them explicitly unless independent
+complete same-meaning evidence resolves the issue. Do not guess lost suffixes or
+silently relax the required decoded subject. Installed version, logging actions,
+collector transformations, and instance provenance still need deployment evidence;
+these public observations do not establish truncation or a defect in an inspected
+deployment.
+
 ## Test criteria
 
 - Every mail condition has negative cases; local bounce, unrelated 5xx text,
@@ -390,3 +415,12 @@ this note; public tests must use independently written synthetic cases.
 
 Use independently written synthetic fixtures and controlled time. These are
 approved criteria, not implemented tests or verified source-generation semantics.
+
+## Public references
+
+- [Postfix queue identity limitations](https://www.postfix.org/postqueue.1.html)
+- [Postfix long and short queue-ID formats](https://www.postfix.org/postconf.5.html#enable_long_queue_ids)
+- [Pinned upstream cleanup action logger](https://github.com/vdukhovni/postfix/blob/108885f3c56c9246802deca3939644aba37ee697/postfix/src/cleanup/cleanup_message.c#L262-L288)
+
+Public implementation evidence describes the cited revision and path only; it
+does not identify or validate a private deployment's installed software.

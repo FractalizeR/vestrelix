@@ -85,7 +85,9 @@ Fingerprint changes require a compatibility decision, not automatic replay.
 
 Restarting or editing a template, rule description, or configuration revision does
 not by itself create a new event identity or resend historical notifications.
-Canonical fingerprint/occurrence-key encodings and compatibility remain
+[C1 encoding envelopes](identity-and-definition-encoding.md) now specify
+fingerprint/occurrence/delivery bytes; encoder/source-profile conformance, concrete
+definition AST bodies, and incompatible transitions remain
 [open](open-decisions.md#identities-and-source-coverage).
 
 ## Agreed operating policies
@@ -121,7 +123,9 @@ measured use. Driver/storage evidence remains outstanding. The
 [configuration and process control contract](configuration-and-process-control.md)
 is also approved, including offline administration, isolated dry-run, bindings,
 authority/activation, and its limits. A user/agent-facing JSON Schema for YAML is
-required; concrete fields/schema/CLI and native/profile evidence remain pending.
+required; concrete fields/schema, gated operator transitions, and native/profile
+evidence remain pending. The initial command surface and encoding envelopes have
+separate selected technical specifications, not implementations.
 The [operations and observability contract](operations-and-observability.md) is
 also approved, including its probe/evidence meanings, metric/log contract, serving
 limits, and initial external alert thresholds. Native/deployment evidence and

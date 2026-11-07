@@ -22,6 +22,8 @@ silently override requirements or close unresolved decisions.
 | [SQLite state lifecycle](sqlite-state-lifecycle.md) | Approved block contract; implementation and driver/storage conformance pending | Durability, concurrency, retention, reduced capacity defaults, automatic expiry/cleanup, migrations, backup/restore, and test criteria |
 | [Configuration and process control](configuration-and-process-control.md) | Approved block contract; implementation, concrete YAML/schema, and conformance pending | Strict settings, required user/agent schema, recovered definitions/bindings, process ownership, activation, isolated dry-run, and test criteria |
 | [Operations and observability](operations-and-observability.md) | Approved block contract; implementation and native/deployment conformance pending | Liveness/readiness, safe logs, bounded metrics, external alert signals, serving limits, and test criteria |
+| [Identity and definition encoding](identity-and-definition-encoding.md) | Selected technical specification; implementation, AST bodies, and conformance pending | Deterministic envelopes, record/occurrence/delivery identity, semantic revisions, and private binding evidence |
+| [Operator and compatibility contract](operator-and-compatibility-contract.md) | Selected technical specification; implementation and native/state conformance pending | Initial CLI, narrow compatibility decisions, protected inspection, conditional resume/requeue, and explicitly gated operations |
 
 Approval of an architectural direction is not approval of every block's detailed
 contract, algorithm, or numerical limit. A preliminary library selection is not
@@ -45,9 +47,10 @@ contracts, state, algorithms, failure handling, resource limits, security, and t
 criteria. Approval of one block does not approve the next block or authorize
 implementation.
 
-All logical blocks listed above now have architectural approval. This closes the
-block-by-block architecture discussion, not implementation readiness. Concrete
-contracts and required evidence remain tracked in [Open decisions](open-decisions.md).
+All logical blocks listed above now have architectural approval; the additional
+technical specifications record delegated choices, not conformance results. This
+closes the block-by-block architecture discussion, not implementation readiness.
+Concrete contracts and required evidence remain tracked in [Open decisions](open-decisions.md).
 In particular, exact YAML fields and the required complete user/agent schema have
 not been produced; there is no supported configuration artifact or application yet.
 
