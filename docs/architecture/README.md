@@ -15,6 +15,7 @@ silently override requirements or close unresolved decisions.
 | [Packages and dependencies](packages-and-dependencies.md) | Approved direction; technology selections are preliminary | Package responsibilities, dependency boundaries, input extensibility, and library choices |
 | [Open decisions](open-decisions.md) | Unresolved | Questions that still need an explicit decision or evidence |
 | [Ingestion](ingestion.md) | Approved block contract; implementation and conformance pending | Input contract, polling, completeness, recovery, limits, and test criteria |
+| [Extraction and normalization](extraction-and-normalization.md) | Review-ready proposal; not approved | Typed facts, field quality, deterministic profiles, subject/time handling, limits, and test criteria |
 
 Approval of an architectural direction is not approval of every block's detailed
 contract, algorithm, or numerical limit. A preliminary library selection is not

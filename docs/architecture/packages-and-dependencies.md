@@ -53,6 +53,8 @@ updates; the durable transition contract must prevent lost updates.
 - `detection` owns event/correlation concepts, extraction, rules, and enrichment
   decisions. `detection/postfix` understands Postfix lifecycle and rejection
   evidence, not VictoriaLogs queries or destination payloads.
+  The [extraction and normalization draft](extraction-and-normalization.md) covers
+  its record-to-facts boundary; event/correlation contracts remain separate.
 - `routing` owns recipient/audience selection, field allowlists, and message
   formation from normalized events, retaining applicable formatting revisions.
 - `delivery` owns job identity, attempt state, bounded retry scheduling, and
