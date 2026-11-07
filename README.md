@@ -12,6 +12,10 @@ HTTP notifications, persistent retries, and Prometheus-compatible metrics.
 See [Functional scope](FEATURES.md) for the agreed requirements, initial acceptance
 scenario, extension points, and open design decisions.
 
+See [Architecture](docs/architecture/README.md) for approved architectural direction,
+preliminary package/dependency choices, open decisions, and block specification
+drafts. Architecture approval does not authorize implementation.
+
 ## Development
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md). Publication checks and repository
