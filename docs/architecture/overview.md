@@ -94,6 +94,13 @@ These choices come from product decisions, not observations about a particular
 deployment. The detailed [ingestion contract](ingestion.md) has separate block
 approval; the remaining block contracts require their own agreement.
 
+The [extraction and normalization contract](extraction-and-normalization.md) is
+also approved. It permits explicit producer fallback chains: equivalent meanings
+can use different source keys, invalid-value fallback needs an explicit policy,
+and cross-meaning selection is opt-in with retained provenance and accurate
+labeling. A header sender does not silently satisfy the first scenario's envelope
+sender requirement, and the SMTP null reverse path is a valid present value.
+
 | Policy | Initial choice |
 | --- | --- |
 | Supported log lateness | One hour; the ingestion contract defines the visibility/clock assumptions |

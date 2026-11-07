@@ -45,6 +45,10 @@ identity must be distinct concepts.
   executes queries; source-independent detection rules do not embed LogsQL.
 - Support multiple configured inputs, rules, and destinations within one process.
 - Extract fields only when needed; reuse fields already returned by the source.
+- Support explicit field-producer fallback chains while preserving meaning and
+  provenance. Cross-meaning fallback requires opt-in and accurate labeling;
+  invalid values cannot silently disappear through fallback. A valid SMTP null
+  reverse path is not missing sender data.
 - Persist read progress and resume after restart.
 - Handle duplicate and late-arriving records through overlapping windows and
   deduplication. Define the supported lateness bound explicitly; arbitrary delays

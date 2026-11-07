@@ -28,7 +28,7 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Detailed YAML model, strict parsing limits, extraction-profile syntax/producer precedence/stable semantic references, and bounded condition mechanisms | Configuration and detection |
+| Detailed YAML model, strict parsing limits, syntax/compatibility for approved extraction precedence and fallback semantics, stable references, and bounded conditions | Configuration and detection |
 | Compatibility and transition policies for recorded rule/input/configuration/format revisions, including explicit migration/replay choices | Configuration and processing |
 | Exact dry-run isolation and explicit historical replay/reprocessing semantics | Process control and processing |
 | SQLite schema migrations, supported upgrade paths, backups, and interrupted/failed upgrade recovery | SQLite state lifecycle |
@@ -49,7 +49,8 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Question or required evidence | Owner |
 | --- | --- |
 | Resource validation of approved ingestion limits; remaining SQLite, processing, rate, queue, and retention limits | Each resource-owning block |
-| Approval of extraction field/pattern/output limits and supported single-observation format boundaries | Extraction and normalization |
+| Resource/format validation for approved extraction limits, single-observation boundaries, and explicit fallback behavior | Extraction and normalization |
+| Approval of proposed lifecycle finalization gates, candidate merge/terminal policy, domain matching, wait/lookup/context limits, and retention dependencies | Detection, correlation, and enrichment |
 | Detailed recovery and operator actions after per-destination/global capacity exhaustion; observable expiry/removal of failed work | Delivery, processing, and SQLite state lifecycle |
 | Health/readiness criteria, stable metric/alert contract, and diagnostic retention | Operations |
 | Destination processing-error opt-in versus system-notification scope, safe fields, bounded repetition, and recursion prevention | Routing, delivery, and operations |
@@ -68,3 +69,7 @@ error/system destinations. The [ingestion block](ingestion.md) has separate
 approval for its polling protocol, fingerprint policy, lifecycle, limits, and test
 criteria. That approval does not close the unanswered contracts or establish the
 acceptance evidence above.
+
+The [extraction block](extraction-and-normalization.md) is approved with explicit
+producer fallbacks and semantic provenance. Approval does not select every source
+format/charset or close the remaining configuration and compatibility questions.

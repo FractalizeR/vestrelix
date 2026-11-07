@@ -1,11 +1,13 @@
 # Extraction and normalization
 
-**Status: review-ready proposal; not approved. Not an implementation baseline.**
+**Status: approved block contract, including explicit fallback policy. Not implemented.**
 
 This block turns source fields and text into bounded, typed observations. It does
 not decide that an event occurred. The approved [ingestion contract](ingestion.md)
 supplies source records; detection, correlation, and enrichment consume the
-resulting facts. This proposal does not approve those later blocks.
+resulting facts. Approval of this block does not approve those later blocks or
+authorize implementation. Explicitly open format/configuration contracts remain
+open.
 
 ## Responsibility and boundary
 
@@ -28,7 +30,7 @@ extraction profile/revision. Configuration supplies the fields needed by rules,
 correlation, and enrichment, plus mandatory evidence needed to interpret the
 record class safely.
 
-The proposed initial representation produces at most one normalized observation
+The initial representation produces at most one normalized observation
 per record. It contains a declared record class, typed scalar facts, per-field
 quality, safe issue codes, and provenance linking facts to their source and
 profile. It is not a normalized business event or a destination message.
@@ -75,6 +77,31 @@ silently become valid through a convenient text fallback. If several producers
 are eligible, their relationship or precedence must be declared. The block does
 not claim to detect contradictions in text it deliberately did not parse.
 
+### Explicit fallback chains
+
+A profile can declare an ordered chain of producers. Missing values allow the
+next producer to be tried. Invalid values allow fallback only under an explicit
+policy; the original issue remains observable rather than disappearing behind a
+successful selection. Record the selected producer, actual meaning, and any
+fallback/quality qualifications. Selection is deterministic for the same profile
+and stable inputs.
+
+Different keys can have the same meaning: `sender`, `from`, or a capture from
+`from=<...>` can all supply an envelope sender when their source contracts say so.
+The key's spelling neither grants nor prevents that interpretation.
+
+A change of meaning, such as envelope sender to header `From:`, requires a separate
+explicit opt-in. Preserve the canonical facts separately and expose an effective
+selection with its actual semantic origin, not a header value renamed into
+`envelope_sender`. Routing/formatting must permit that selected meaning and label
+it accurately. Such a selection does not satisfy an envelope-only requirement.
+The first acceptance scenario remains envelope-only; a differently configured
+notification variant is an explicit semantic change, not an automatic fallback.
+
+The SMTP null reverse path `<>` is a valid present envelope sender, not missing
+data. Do not replace it through a missing-value fallback. A producer's empty/null
+representation must distinguish absence from this valid SMTP value.
+
 Missing subject or sender in a recipient-result record can be an ordinary partial
 observation: another record may contain the context. It is not an error for every
 line to lack every notification field. Correlation/enrichment owns waiting,
@@ -98,7 +125,7 @@ reference used by an explicitly supported format must come from stable source
 data or be fixed and reused by the processing contract. The extractor does not
 create a private durable cache to make such inference appear deterministic.
 
-Proposed processing sequence:
+Processing sequence:
 
 1. Select the explicitly configured profile and applicable declared record class.
    Do not guess by running every available parser until one returns values.
@@ -134,9 +161,11 @@ allowlists, queue-ID reuse, and the event decision.
 
 Raw SMTP diagnostics may be transient parser input, but the result carries only
 necessary typed evidence, not a generic raw-diagnostic field available to all
-destinations. Body, attachments, other recipients, or headers are not collected
-as fallback notification content. Source-supplied data remains untrusted even
-when it is syntactically valid.
+destinations. Body, attachments, other recipients, or an entire header collection
+are not fallback notification content. An explicitly permitted header-field
+selection follows the semantic fallback policy above; it does not permit general
+header forwarding. Source-supplied data remains untrusted even when syntactically
+valid.
 
 ## Subject and time handling
 
@@ -145,8 +174,8 @@ assembled across records. Supported header folding is unfolded before RFC 2047
 decoding, without changing the original record fingerprint. Arbitrary embedded
 newlines or extra header material do not become valid folding.
 
-Validate the decoded display value as well as the source representation. Propose
-rejecting remaining CR, LF, NUL, and other control characters rather than silently
+Validate the decoded display value as well as the source representation. Reject
+remaining CR, LF, NUL, and other control characters rather than silently
 removing them. A syntactically valid encoded word that decodes to such characters
 is not an acceptable display subject. Destination escaping remains a separate
 formatting responsibility; this validation does not make the value trusted markup.
@@ -185,13 +214,12 @@ work. Changing a parser does not automatically replay accepted history or mutate
 already admitted events/jobs. Compatibility and explicit reprocessing are governed
 by the [configuration/state contract](open-decisions.md#configuration-and-state-compatibility).
 
-## Proposed limits
+## Limits
 
 The source-record size and field bounds are inherited from the approved ingestion
-contract. The following additional defaults are **proposals, not approved or
-benchmarked**:
+contract. The following additional defaults are **approved, not benchmarked**:
 
-| Setting | Proposed initial value |
+| Setting | Initial value |
 | --- | --- |
 | Normalized fact fields per observation | 32, with declared names |
 | Total normalized fact content | 16 KiB |
@@ -210,12 +238,17 @@ work, but do not establish a benchmarked CPU latency or process-RSS guarantee.
 Configuration must also bound the overall number of profiles/producers. Observe
 processing duration and limit failures with bounded, non-sensitive labels.
 
-## Proposed test criteria
+## Test criteria
 
 - Declared structured fields and supported text forms produce equivalent facts;
   ignored source keys cannot overwrite metadata or change field meanings.
-- Header addresses cannot substitute for envelope addresses. Status text or an
-  unrelated 5xx substring cannot manufacture confirmed remote-rejection evidence.
+- Same-meaning aliases and missing-value fallback preserve semantics. An invalid
+  primary uses fallback only when explicitly permitted and retains its issue.
+- Cross-meaning fallback is opt-in, retains origin and accurate labeling, and
+  cannot satisfy an envelope-only requirement. The null reverse path remains a
+  valid present value rather than triggering fallback.
+- Status text or an unrelated 5xx substring cannot manufacture confirmed
+  remote-rejection evidence.
 - Expected partial records differ from malformed present fields, conflicting
   producers, known unrelated classes, and unsupported expected formats.
 - Multiple independent results in one unsupported representation are not reduced
@@ -239,4 +272,4 @@ processing duration and limit failures with bounded, non-sensitive labels.
 
 Use independently written synthetic fixtures and reserved example domains. No
 private deployment configuration, logs, or parser implementation is a source for
-public fixtures. These are proposed acceptance criteria, not implemented tests.
+public fixtures. These are approved acceptance criteria, not implemented tests.

@@ -15,12 +15,13 @@ silently override requirements or close unresolved decisions.
 | [Packages and dependencies](packages-and-dependencies.md) | Approved direction; technology selections are preliminary | Package responsibilities, dependency boundaries, input extensibility, and library choices |
 | [Open decisions](open-decisions.md) | Unresolved | Questions that still need an explicit decision or evidence |
 | [Ingestion](ingestion.md) | Approved block contract; implementation and conformance pending | Input contract, polling, completeness, recovery, limits, and test criteria |
-| [Extraction and normalization](extraction-and-normalization.md) | Review-ready proposal; not approved | Typed facts, field quality, deterministic profiles, subject/time handling, limits, and test criteria |
+| [Extraction and normalization](extraction-and-normalization.md) | Approved block contract; not implemented | Typed facts, explicit fallback, field quality, deterministic profiles, subject/time handling, limits, and test criteria |
+| [Detection, correlation, and enrichment](detection-correlation-and-enrichment.md) | Review-ready proposal; not approved | Lifecycle proof, occurrence identity, bounded context/waiting/lookups, finalization, retention, and test criteria |
 
 Approval of an architectural direction is not approval of every block's detailed
 contract, algorithm, or numerical limit. A preliminary library selection is not
-evidence of operational suitability. Ingestion has separate block approval; its
-conformance evidence and explicitly open contracts are still outstanding.
+evidence of operational suitability. Ingestion and extraction have separate block
+approval; conformance evidence and explicitly open contracts remain outstanding.
 
 The [agreed operating policies](overview.md#agreed-operating-policies) record
 fingerprint equivalence, time/context bounds, retry defaults, and the direction of
