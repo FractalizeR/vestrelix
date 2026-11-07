@@ -20,7 +20,7 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | --- | --- |
 | Supported profile mappings and conformance for subject/envelope/receipt data without changing Postfix or the SMTP path; preliminary source feasibility does not prove complete or unambiguous lifecycle evidence | Postfix detection profile and source access |
 | Unambiguous originating-relay and queue-ID lifecycle identification, including reuse | Postfix detection profile |
-| Concrete address/source-format validation within the approved ASCII/punycode scope, supported subject charsets/folding, and evidence for malformed/control/truncation outcomes | Postfix detection profile |
+| Concrete address/source-format validation within the approved ASCII/punycode scope, the fixed alias table and decoder/dependency evidence for approved subject charsets, supported source folding, and malformed/control/truncation outcomes | Postfix detection profile |
 | State/resource validation of approved receipt-anchored context expiry and candidate pinning; longer-lived operations and pre-observation history evidence | Detection and enrichment |
 | Concrete enrichment lookup bindings and source evidence within approved wait/request budgets | Detection, processing, and source access |
 
@@ -79,6 +79,9 @@ error/system destinations. Separate explicit context-loading and notification
 boundaries, no-auto-skip outage recovery with delayed eligible notifications, and
 the initial ASCII/punycode address scope are also approved. Exact configuration,
 recovery operations, source-format validation, and deployment evidence remain open.
+The [subject charset scope](extraction-and-normalization.md#subject-and-time-handling)
+is approved separately from addresses; concrete aliases, source-format/decoder
+conformance, and dependency review remain open.
 The [preliminary source observations](detection-correlation-and-enrichment.md#preliminary-source-feasibility)
 are anonymized feasibility notes, not closure of source/profile acceptance gates.
 The [ingestion block](ingestion.md) has separate

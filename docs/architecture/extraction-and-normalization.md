@@ -180,6 +180,15 @@ assembled across records. Supported header folding is unfolded before RFC 2047
 decoding, without changing the original record fingerprint. Arbitrary embedded
 newlines or extra header material do not become valid folding.
 
+The initial subject charset scope is approved: plain UTF-8 text and RFC 2047
+encoded words using UTF-8, US-ASCII, Windows-1251, KOI8-R, KOI8-U, ISO-8859-5,
+or ISO-8859-1. Subject support is independent of the ASCII envelope-address scope.
+Use a fixed, reviewed table of canonical charset names and accepted standard
+aliases; do not inherit every label accepted by a decoder library. Do not guess
+encodings, consult the host locale, or reinterpret undecodable bytes using a
+different charset. The concrete alias table and decoder conformance remain
+profile-specification gates, not implemented capabilities.
+
 Validate the decoded display value as well as the source representation. Reject
 remaining CR, LF, NUL, and other control characters rather than silently
 removing them. A syntactically valid encoded word that decodes to such characters
@@ -190,8 +199,11 @@ Malformed encoded words, invalid UTF-8, unsupported charsets, and known source
 truncation have explicit outcomes. Do not silently replace undecodable bytes,
 send encoded text as a substitute for required decoded subject, or invent omitted
 characters. A forgiving library decoder is not proof that malformed-looking input
-is valid: the supported cases and failure behavior require tests. Charset coverage
-and any additional decoding dependency remain
+is valid: the supported cases and failure behavior require tests. Unsupported or
+invalid subject facts cannot satisfy required decoded context; detection/enrichment
+owns waiting and final unresolved outcomes under the existing fallback policy.
+Concrete alias/source-format coverage, decoder evidence, and any additional
+decoding dependency remain
 [open](open-decisions.md#mail-scenario).
 
 Keep three times distinct: source search time, acquisition/observation time, and
@@ -269,6 +281,10 @@ processing duration and limit failures with bounded, non-sensitive labels.
 - Subject cases cover plain text, multiple encoded words, supported folding,
   unsupported charsets, malformed words, invalid UTF-8, known truncation, and
   control/header-injection characters both before and after decoding.
+- Each approved subject charset and accepted alias has synthetic decoding cases;
+  mixed encoded words remain valid only when every part passes its declared
+  charset and syntax checks. Unsupported labels, host-locale differences, and
+  decoder leniency cannot broaden the accepted table or hide invalid bytes.
 - Pattern, field, record, output, and expansion limits fail explicitly without
   clipping, uncontrolled allocation, or retained per-record caches.
 - Configuration rejects unsupported profiles, invalid producer relationships,
