@@ -12,7 +12,7 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Acceptance evidence for the approved bounded-read protocol and supported VictoriaLogs API/version, including query-subset validation, mid-response errors, partial responses, and equal timestamps | VictoriaLogs input |
 | Observation-start/backfill policy, outage/catch-up horizon, and deployment evidence for the approved visibility/clock and source-retention assumptions | Ingestion and processing |
 | Canonical encoding/compatibility of approved business-occurrence keys, distinct from correlation and source records | Detection |
-| Replay-protection lifetime and behavior when a paused input still needs old markers | Processing and SQLite state lifecycle |
+| Approval of proposed replay-marker retirement gates and retained identity horizons, including paused inputs and later records for old occurrences | Processing and SQLite state lifecycle |
 
 ## Mail scenario
 
@@ -31,20 +31,19 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Detailed YAML model, strict parsing limits, syntax/compatibility for approved extraction precedence and fallback semantics, stable references, and bounded conditions | Configuration and detection |
 | Compatibility and transition policies for recorded rule/input/configuration/format revisions, including explicit migration/replay choices | Configuration and processing |
 | Exact dry-run isolation and explicit historical replay/reprocessing semantics | Process control and processing |
-| SQLite schema migrations, supported upgrade paths, backups, and interrupted/failed upgrade recovery | SQLite state lifecycle |
+| Approval of SQLite lifecycle policy; concrete schemas, supported upgrade paths, driver mechanisms, and migration/backup/restore evidence remain separate gates | SQLite state lifecycle |
 | Exact library versions, license/dependency review, resource validation, and native target checks for preliminary selections | Relevant block and development tooling |
 
 ## Delivery and HTTP
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Destination success criteria and permanent/transient error classification | Delivery and webhook profile |
+| Profile-specific success/error evidence, including Pachca; generic HTTP classification is approved | Delivery and webhook profile |
 | Recoverable binding mechanism and evidence for approved target continuity, credential rotation versus recipient changes, and unavailable/revoked references | Configuration, routing, and delivery |
-| Redirect policy and relation between durable attempts and physical sends, including standard HTTP transport retries | HTTP delivery |
-| Detailed retry accounting and error classification under the selected defaults, including `Retry-After` handling and queue wait versus attempt deadline | Delivery |
-| Bounded retained attempt/response diagnostics, including receiver-echoed sensitive data and limits of wire/reproduction evidence | Delivery and operations |
-| Explicit requeue budget/deadline rules and deduplication horizon after retained events/jobs expire | Delivery and processing |
-| Approval of the delivery/HTTP proposal, including first-start deadlines, attempt ownership, HTTP restrictions, cooldowns, manual rounds, queue/rate limits, and diagnostic limits | Delivery and HTTP |
+| Conformance of approved no-redirect/one-POST accounting under standard HTTP transport behavior | HTTP delivery |
+| Native/resource evidence for approved retry accounting, clock gates, server cooldowns, and first-start versus retry deadlines | Delivery |
+| Operational evidence for approved bounded attempt diagnostics and response privacy; any richer response capture needs a new decision | Delivery and operations |
+| State protection/retention for approved explicit requeue budgets and operation IDs, and deduplication after retained jobs expire | Delivery, processing, and SQLite state lifecycle |
 | Transport conformance for one POST exchange per charged attempt and profile-specific success/idempotency evidence, including Pachca | HTTP delivery and webhook profile |
 
 ## Resources, retention, and operations
@@ -55,6 +54,8 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 | Resource/format validation for approved extraction limits, single-observation boundaries, and explicit fallback behavior | Extraction and normalization |
 | Resource/source validation of approved lifecycle gates, candidate merge/terminal policy, domain matching, wait/lookup/context limits, and retention dependencies | Detection, correlation, and enrichment |
 | Resource/profile validation of approved routing snapshots, field policies, profile-owned formats, protected diagnostics, error quotas, and loop boundaries | Routing and formatting |
+| Resource/native validation of approved delivery queue, rate, concurrency, and diagnostic limits | Delivery and HTTP |
+| Approval of SQLite durability settings, writer/read limits, retention, marker retirement, capacity reserves, maintenance, and restore hold | SQLite state lifecycle |
 | Detailed recovery and operator actions after per-destination/global capacity exhaustion; observable expiry/removal of failed work | Delivery, processing, and SQLite state lifecycle |
 | Health/readiness criteria, stable metric/alert contract, and diagnostic retention | Operations |
 | Detailed local inspection, auxiliary snapshot expiry/capacity accounting, and recoverable formatter definitions | Operations, routing, and SQLite state lifecycle |
@@ -64,8 +65,8 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 The agreed destination-capacity direction is recorded in the
 [overview](overview.md#privacy-capacity-and-operations): preserve visible
 non-delivery for the affected destination rather than blocking healthy
-destinations solely on its automatic queue. Concrete limits and the detailed
-recovery/retention contract remain open.
+destinations solely on its automatic queue. Delivery queue limits and explicit
+requeue are approved; global state capacity, expiry, and retention remain proposed.
 
 The [agreed operating policies](overview.md#agreed-operating-policies) close the
 choices of record-equivalence semantics, one-hour lateness, seven-day minimal
@@ -87,5 +88,8 @@ proof still needs evidence; approval does not establish it.
 The [routing block](routing-and-formatting.md) is approved, including profile-owned
 formats, protected diagnostics, its limits, and independent error/system policies.
 It does not establish destination behavior or choose recoverable configuration
-mechanisms. The [delivery/HTTP proposal](delivery-and-http.md) remains unapproved;
-its detailed answers to the delivery questions above require separate agreement.
+mechanisms. The [delivery/HTTP block](delivery-and-http.md) is also approved,
+including its retry/first-start accounting, HTTP policy, cooldowns, requeue, limits,
+and diagnostic privacy. Transport/profile evidence remains outstanding. The
+[SQLite state lifecycle proposal](sqlite-state-lifecycle.md) is not approved and
+does not close the associated retention, storage, or maintenance gates.

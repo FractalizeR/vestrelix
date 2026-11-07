@@ -1,12 +1,13 @@
 # Delivery and HTTP
 
-**Status: review-ready proposal; not approved. Not an implementation baseline.**
+**Status: approved block contract. Not implemented or transport/profile-conformance-verified.**
 
 This block turns durable, formed assignments into bounded network attempts and
-visible outcomes. It proposes ownership, HTTP policy, queue waiting, recovery,
-and explicit requeue. Only the shared retry defaults and upstream contracts are
-already approved. No application, command syntax, Go interface, SQL schema, or
-implementation sequence is specified here.
+visible outcomes. The project owner approved its ownership, HTTP policy, queue
+waiting, recovery, explicit requeue, limits, and test criteria. Approval does not
+establish transport/profile conformance, close configuration/state gates, or
+authorize implementation. No application, command syntax, Go interface, SQL
+schema, or implementation sequence is specified here.
 
 ## Boundaries and identity
 
@@ -42,7 +43,7 @@ automatic delivery because configuration changed or input was replayed.
 
 ## Attempt ownership and durable transitions
 
-Propose one owner per job and one active round. A conditional transition checks
+Use one owner per job and one active round. A conditional transition checks
 the expected state/revision and installs a unique round/attempt token. This
 coordinates workers inside the single active process; it does not replace the
 process-control gate that prevents two active instances using the same state.
@@ -74,7 +75,7 @@ delivery; global storage failure does not permit unrecorded network work.
 
 ## Queue time, retry budgets, and clocks
 
-Propose a one-hour first-start deadline from admission of a round. For the initial
+Use a one-hour first-start deadline from admission of a round. For the initial
 round this is job admission; explicit requeue records a new round admission
 without changing the original job admission. This deadline applies only until
 the first charged attempt. Expiry leaves visible first-start non-delivery with
@@ -99,7 +100,7 @@ turn that observation into another send. Do not accept a response first observed
 after the request deadline as a timely acknowledgment.
 
 Use monotonic elapsed time for live-process durations and retain UTC anchors for
-restart. Propose durable clock high-water evidence and explicit fail-closed pause
+restart. Retain durable clock high-water evidence and explicitly pause fail-closed
 on a detected backward wall-clock jump, not a frozen clock that stretches budgets.
 Forward jumps can expire work early. A pause never shortens a retained server
 cooldown or automatically resets a round; resume requires validated clock/budget
@@ -113,7 +114,7 @@ does not clear a destination-wide safety/cooldown gate.
 
 ## HTTP exchange and target safety
 
-Propose HTTPS POST with normal certificate/hostname verification for production.
+Use HTTPS POST with normal certificate/hostname verification for production.
 There is no insecure-TLS fallback, alternate recipient, automatic authentication
 discovery, or cookie jar. Tests may use local plain-HTTP synthetic servers; this
 does not make arbitrary production HTTP targets supported.
@@ -127,7 +128,7 @@ references must satisfy the approved binding-continuity contract at every send.
 The required accounting property is at most one outbound POST exchange per
 charged attempt. Go's standard transport can retry some requests, particularly
 replayable requests carrying idempotency headers; absence of a retry wrapper is
-not sufficient. Propose a conservative initial candidate configuration:
+not sufficient. Use this conservative initial candidate configuration:
 
 - HTTP/1.1 only, fresh connection per attempt, no keep-alive reuse.
 - A non-replayable request body, without an automatic body-recreation hook.
@@ -144,15 +145,15 @@ transport cannot satisfy the property, return to architectural review rather tha
 silently building a custom HTTP/TLS stack or allowing uncharged resends.
 
 The request deadline covers connection acquisition, DNS/dialing, TLS, writing,
-headers, and any required acknowledgment body. Propose 16 KiB response headers
-and 64 KiB response body input, with bounded profile parsing and memory. Disable
+headers, and any required acknowledgment body. Limit response headers and body
+input to 16 KiB and 64 KiB respectively, with bounded profile parsing and memory. Disable
 implicit compression/decompression; reject unsupported content encoding when a
 body is required. Close bodies/connections without unbounded draining. Do not
 follow response links or fetch acknowledgment URLs.
 
 ## Acknowledgment and error classification
 
-A profile defines its success predicate before it is enabled. Propose an explicit
+A profile defines its success predicate before it is enabled. Use an explicit
 generic JSON webhook profile whose predicate is a valid final HTTP 2xx status;
 its response body is irrelevant. In that profile, confirmed 202 means accepted
 by the endpoint, not completed downstream processing, read receipt, or inbox
@@ -166,7 +167,7 @@ budget. A documented negative acknowledgment follows the profile's closed
 classification. An unknown profile contract blocks activation before any send;
 do not discover after sending that no success/error policy exists.
 
-| Result | Proposed generic behavior |
+| Result | Generic behavior |
 | --- | --- |
 | Valid profile-defined success | Save success; no more automatic attempts |
 | Timeout, reset, interrupted response, transient connection/DNS failure | Retry within budget; preserve ambiguity where acceptance is unknown |
@@ -195,7 +196,7 @@ only when the receiver actually honors them; neither establishes exactly once.
 
 ## Retry-After and destination cooldown
 
-Propose honoring `Retry-After` on generic HTTP 429 and 503, or additional outcomes
+Honor `Retry-After` on generic HTTP 429 and 503, or additional outcomes
 explicitly defined by a verified profile. Accept one bounded value as decimal
 nonnegative delay-seconds or an HTTP date. Zero and a date in the past are valid;
 negative, conflicting/multiple, or malformed values produce a safe invalid-hint
@@ -224,9 +225,9 @@ recorded hints, not unknowable server responses.
 
 ## Scheduling, capacity, and independent destinations
 
-Propose these additional defaults; they are **not approved or benchmarked**:
+These additional defaults are **approved, not benchmarked**:
 
-| Setting | Initial proposal |
+| Setting | Initial value |
 | --- | --- |
 | First-start wait per newly admitted round | One hour |
 | Active network attempts per destination / process | 1 / 4 |
@@ -266,13 +267,13 @@ only if attempt/time budgets, target continuity, clock state, rate, and cooldown
 allow it; otherwise expose non-delivery. SQLite cannot prove whether a pre-crash
 POST reached a receiver. Favor a duplicate within budget, not fabricated success.
 
-Shutdown stops new claims first. Propose at most 20 seconds to drain delivery
+Shutdown stops new claims first. Allow at most 20 seconds to drain delivery
 workers and persist results, without extending any request deadline. Then cancel
 remaining exchanges; charged interrupted work remains consumed and ambiguous.
 Do not release an unfinished worker's slot to a replacement during shutdown.
 A hard kill relies on the same durable recovery, not a presumed clean exit.
 
-Propose a local explicit requeue operation with a caller-supplied operation ID and
+Use a local explicit requeue operation with a caller-supplied operation ID and
 expected job revision. It admits at most one new round atomically with queue
 capacity and an auditable chosen, validated delivery-policy revision. This gives
 a new first-start window and, on its first charge, a new finite retry budget; it
@@ -306,7 +307,7 @@ metadata only: phase/class, HTTP status, timing, byte counts, ambiguity, applica
 revisions, counters, and opaque diagnostic reference. Never serialize arbitrary
 HTTP errors, target URLs, headers, bodies, or credentials into ordinary output.
 
-Propose retaining at most the latest 32 bounded attempt detail entries per job,
+Retain at most the latest 32 bounded attempt detail entries per job,
 plus bounded lifetime counters and latest known result/current unresolved status.
 Eviction is explicit, with omitted-entry counts; it cannot remove pending
 ownership, budget, round numbering, operation markers, or delivery identity.
@@ -327,7 +328,7 @@ delivery failure cases, not every attempt. An error/system notice's own delivery
 failure produces logs/metrics only, never another notice. Terminal work stays
 inspectable even if its secondary notice is suppressed.
 
-## Proposed test criteria and evidence gates
+## Test criteria and evidence gates
 
 - Real temporary SQLite tests and controlled clocks cover concurrent claims,
   token-conditional results, uncertain commits, and crash barriers before charge,
@@ -356,7 +357,7 @@ inspectable even if its secondary notice is suppressed.
   response diagnostics, ordinary logs, metrics, or system notices. Local prepared
   content inspection remains read-only and does not claim wire/receipt proof.
 
-These are proposed acceptance criteria, not implemented tests or verified
+These are approved acceptance criteria, not implemented tests or verified
 destination/transport behavior. Configuration recovery, state retention/capacity,
 single-instance enforcement, and profile conformance remain explicit prerequisites.
 

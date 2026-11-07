@@ -111,8 +111,12 @@ including frozen audience/field definitions, profile-owned prepared content,
 protected local diagnostics, bounded error reporting, and its resource defaults.
 JSON belongs to the initial HTTP webhook body, not every output format. Exact
 configuration recovery and destination conformance remain evidence/design gates.
-The next [delivery and HTTP block](delivery-and-http.md) is a separate unapproved
-proposal; its queue, HTTP, and operator policies are not approved by this overview.
+The [delivery and HTTP contract](delivery-and-http.md) is also approved, including
+attempt ownership, first-start/retry rounds, HTTP classification, server cooldowns,
+explicit requeue, and its limits. Transport/profile conformance and state gates
+remain outstanding. The next [SQLite state lifecycle block](sqlite-state-lifecycle.md)
+is a separate unapproved proposal; its retention, capacity, and maintenance policies
+are not approved by this overview.
 
 | Policy | Initial choice |
 | --- | --- |

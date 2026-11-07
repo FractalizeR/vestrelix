@@ -67,7 +67,7 @@ updates; the durable transition contract must prevent lost updates.
 - `delivery` owns job identity, attempt state, bounded retry scheduling, and
   destination isolation. `delivery/webhook` performs network operations and
   classifies responses rather than running a separate hidden retry loop.
-  The [delivery and HTTP proposal](delivery-and-http.md) is not approved; its
+  The [delivery and HTTP contract](delivery-and-http.md) is approved; its
   transport settings and destination predicates still require conformance evidence.
 - Pachca initially remains a webhook configuration profile. A separate package
   needs actual profile-specific behavior, not merely a destination name.
@@ -81,6 +81,10 @@ updates; the durable transition contract must prevent lost updates.
 execution, migrations, and cleanup execution, not business policy. The required
 atomic acceptance boundaries are described in the [overview](overview.md#durable-boundaries).
 Independently committing one repository per domain cannot replace them.
+
+The [SQLite state lifecycle proposal](sqlite-state-lifecycle.md) is not approved.
+Its durability settings, retention/capacity policies, migrations, and backup/restore
+contracts require separate agreement and native driver/storage validation.
 
 Consumer blocks describe the persistence behavior they need; the backend
 implements it using subject-owned concepts. Core blocks do not import the backend
