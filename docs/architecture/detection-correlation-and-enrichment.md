@@ -377,6 +377,21 @@ collector transformations, and instance provenance still need deployment evidenc
 these public observations do not establish truncation or a defect in an inspected
 deployment.
 
+Postfix also documents `nested_header_checks` as inheriting `header_checks` by
+default and inspecting headers of attached messages. In the pinned header callback,
+primary, MIME, and nested checks all invoke the same `header` action context.
+Consequently, an `INFO` Subject record need not identify header depth unless its
+producer/action has an independently verified distinguishing contract. This does
+not make every INFO producer unsupported: an explicitly proven primary-only
+producer or other trusted discriminator can satisfy the requirement.
+
+A sole decodable Subject entry cannot prove that the outer message had that
+Subject; an outer message can lack the header while an attachment supplies one.
+Do not select the first, last, or only matching Subject as a workaround. Missing
+primary-origin evidence is a source/profile gate under the existing prohibition
+on Postfix configuration changes, not permission to forward an attachment's subject or claim
+that every possible alternative source is unavailable.
+
 ## Test criteria
 
 - Every mail condition has negative cases; local bounce, unrelated 5xx text,
@@ -420,7 +435,9 @@ approved criteria, not implemented tests or verified source-generation semantics
 
 - [Postfix queue identity limitations](https://www.postfix.org/postqueue.1.html)
 - [Postfix long and short queue-ID formats](https://www.postfix.org/postconf.5.html#enable_long_queue_ids)
+- [Postfix nested-header inspection default](https://www.postfix.org/postconf.5.html#nested_header_checks)
 - [Pinned upstream cleanup action logger](https://github.com/vdukhovni/postfix/blob/108885f3c56c9246802deca3939644aba37ee697/postfix/src/cleanup/cleanup_message.c#L262-L288)
+- [Pinned primary/MIME/nested header action dispatch](https://github.com/vdukhovni/postfix/blob/108885f3c56c9246802deca3939644aba37ee697/postfix/src/cleanup/cleanup_message.c#L539-L553)
 
 Public implementation evidence describes the cited revision and path only; it
 does not identify or validate a private deployment's installed software.

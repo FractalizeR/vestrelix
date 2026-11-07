@@ -180,6 +180,13 @@ assembled across records. Supported header folding is unfolded before RFC 2047
 decoding, without changing the original record fingerprint. Arbitrary embedded
 newlines or extra header material do not become valid folding.
 
+For the first mail scenario, the producer must establish that this is the outer
+rejected message's primary Subject, not a header of an attached message. Syntactic
+validity, one observed Subject, or a matching queue ID alone does not establish
+that origin. Require a verified producer/class marker or equivalent supported
+source evidence. Unknown origin remains explicitly qualified and cannot satisfy
+the required primary subject; detection/enrichment owns waiting and final outcomes.
+
 The initial subject charset scope is approved: plain UTF-8 text and RFC 2047
 encoded words using UTF-8, US-ASCII, Windows-1251, KOI8-R, KOI8-U, ISO-8859-5,
 or ISO-8859-1. Subject support is independent of the ASCII envelope-address scope.
@@ -319,6 +326,9 @@ processing duration and limit failures with bounded, non-sensitive labels.
 - Subject cases cover plain text, multiple encoded words, supported folding,
   unsupported charsets, malformed words, invalid UTF-8, known truncation, and
   control/header-injection characters both before and after decoding.
+- Synthetic outer/nested-message cases include different subjects, no outer
+  Subject, and only one observed nested Subject. No count, ordering, or queue-ID
+  heuristic can promote unproven nested/header origin into a primary subject.
 - Each approved subject charset and accepted alias has synthetic decoding cases;
   mixed encoded words remain valid only when every part passes its declared
   charset and syntax checks. Unsupported labels, host-locale differences, and

@@ -202,6 +202,10 @@ recipient, the decoded subject, and the timestamp of receipt by the outbound
 relay. Do not include the body, attachments, other recipients, or raw SMTP
 diagnostics.
 
+The subject belongs to the outer message whose delivery failed, not to a message
+attached to it. Source evidence must establish both that provenance and a complete
+value; finding one decodable Subject entry is not sufficient by itself.
+
 Envelope addresses need not equal the `From:`/`To:` headers. The notification time
 means receipt by the outbound relay, not the message's `Date:` header or an earlier
 submission elsewhere. A rejection days later must still be correlated with the

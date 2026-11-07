@@ -18,7 +18,7 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Supported profile mappings and conformance for subject/envelope/receipt data without changing Postfix or the SMTP path; preliminary source feasibility does not prove complete or unambiguous lifecycle evidence | Postfix detection profile and source access |
+| Supported profile mappings and conformance for complete primary-message subject provenance, envelope/receipt data, and lifecycle evidence without changing Postfix or the SMTP path; preliminary feasibility or a sole decodable INFO Subject does not establish these properties | Postfix detection profile and source access |
 | Unambiguous originating-relay and queue-ID lifecycle identification, including reuse | Postfix detection profile |
 | Concrete address/source-format validation within the approved ASCII/punycode scope, decoder/dependency conformance for the fixed subject charset/alias table, supported source folding, and malformed/control/truncation outcomes | Postfix detection profile |
 | State/resource validation of approved receipt-anchored context expiry and candidate pinning; longer-lived operations and pre-observation history evidence | Detection and enrichment |
