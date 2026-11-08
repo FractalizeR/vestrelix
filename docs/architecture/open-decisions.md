@@ -18,9 +18,9 @@ an implementation sequence. Owners are logical blocks, not assigned people.
 
 | Question or required evidence | Owner |
 | --- | --- |
-| Supported profile mappings and conformance for complete primary-message subject provenance, envelope/receipt data, and lifecycle evidence without changing Postfix or the SMTP path; preliminary feasibility or a sole decodable INFO Subject does not establish these properties | Postfix detection profile and source access |
+| Supported profile mappings and conformance for required envelope/receipt data and lifecycle evidence without changing Postfix or the SMTP path; preliminary feasibility does not establish these properties | Postfix detection profile and source access |
 | Unambiguous originating-relay and queue-ID lifecycle identification, including reuse | Postfix detection profile |
-| Concrete address/source-format validation within the approved ASCII/punycode scope, decoder/dependency conformance for the fixed subject charset/alias table, supported source folding, and malformed/control/truncation outcomes | Postfix detection profile |
+| Concrete address/source-format validation within the approved ASCII/punycode scope; bounded library decoding and safe omission/display tests for optional subject hints, including nested/unknown origin, masking, malformed input, controls, and truncation | Postfix detection profile |
 | State/resource validation of approved receipt-anchored context expiry and candidate pinning; longer-lived operations and pre-observation history evidence | Detection and enrichment |
 | Concrete enrichment lookup bindings and source evidence within approved wait/request budgets | Detection, processing, and source access |
 
@@ -80,9 +80,12 @@ error/system destinations. Separate explicit context-loading and notification
 boundaries, no-auto-skip outage recovery with delayed eligible notifications, and
 the initial ASCII/punycode address scope are also approved. Exact configuration,
 recovery operations, source-format validation, and deployment evidence remain open.
-The [subject charset scope](extraction-and-normalization.md#subject-and-time-handling)
-is approved separately from addresses. Its fixed alias table and strict word
-syntax are selected; source-format/decoder conformance and dependency review remain open.
+The [subject hint policy](extraction-and-normalization.md#subject-and-time-handling)
+is approved separately from required evidence: optional bounded best-effort display,
+without a fixed charset/alias table, custom strict word validator, completeness
+guarantee, or subject-proof acceptance gate. Missing/unusable hints never block an
+otherwise confirmed notification. Concrete decoder/resource tests and dependency
+review remain open; required lifecycle and recipient binding are not weakened.
 The [C1 encoding envelopes](identity-and-definition-encoding.md) and
 [initial operator/compatibility specification](operator-and-compatibility-contract.md)
 record delegated technical choices. They do not supply concrete definition AST

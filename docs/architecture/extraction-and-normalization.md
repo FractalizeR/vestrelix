@@ -102,10 +102,11 @@ The SMTP null reverse path `<>` is a valid present envelope sender, not missing
 data. Do not replace it through a missing-value fallback. A producer's empty/null
 representation must distinguish absence from this valid SMTP value.
 
-Missing subject or sender in a recipient-result record can be an ordinary partial
-observation: another record may contain the context. It is not an error for every
-line to lack every notification field. Correlation/enrichment owns waiting,
-history requests, and the final decision that required context is unavailable.
+Missing sender in a recipient-result record can be an ordinary partial observation:
+another record may contain the required context. It is not an error for every line
+to lack every notification field. Correlation/enrichment owns waiting, history
+requests, and the final decision that required context is unavailable. The subject
+is optional display context and never creates such a waiting obligation.
 
 Malformed present fields, conflicts, and unsupported expected formats remain
 observable immediately through safe issue codes and bounded diagnostics. This
@@ -175,81 +176,38 @@ valid.
 
 ## Subject and time handling
 
-Decode a complete subject value, not a subject guessed from unrelated text or
-assembled across records. Supported header folding is unfolded before RFC 2047
-decoding, without changing the original record fingerprint. Arbitrary embedded
-newlines or extra header material do not become valid folding.
+The subject is an optional diagnostic hint, not required evidence. Decode bounded
+plain text and RFC 2047 encoded words best-effort using a maintained library.
+Supported folding and log transformations belong to the configured source profile;
+do not assemble a subject from unrelated records or infer missing suffixes.
+Normalization does not change the original record fingerprint.
 
-For the first mail scenario, the producer must establish that this is the outer
-rejected message's primary Subject, not a header of an attached message. Syntactic
-validity, one observed Subject, or a matching queue ID alone does not establish
-that origin. Require a verified producer/class marker or equivalent supported
-source evidence. Unknown origin remains explicitly qualified and cannot satisfy
-the required primary subject; detection/enrichment owns waiting and final outcomes.
+Select the configured outer-message subject source. Known nested-message/MIME
+headers are not substitutes. If the profile cannot distinguish outer from nested
+origin, omit the hint without waiting for proof or requiring producer changes.
+No count/order heuristic promotes a nested header, and no new subject-proof
+handshake, completeness frame, or authenticity guarantee is required.
 
-The initial subject charset scope is approved: plain UTF-8 text and RFC 2047
-encoded words using UTF-8, US-ASCII, Windows-1251, KOI8-R, KOI8-U, ISO-8859-5,
-or ISO-8859-1. Subject support is independent of the ASCII envelope-address scope.
-Use a fixed, reviewed table of canonical charset names and accepted standard
-aliases; do not inherit every label accepted by a decoder library. Do not guess
-encodings, consult the host locale, or reinterpret undecodable bytes using a
-different charset. Match the following closed table using ASCII case-insensitive
-comparison, without trimming or punctuation rewriting:
+There is no closed application charset/alias table or custom strict encoded-word
+validator. Charset coverage is independent of the ASCII envelope-address scope.
+Use declared encodings and deterministic library behavior, not the host locale.
+Malformed words, unknown charsets, invalid bytes, or decoding errors may produce
+replacement text or omission; they must not abort required-fact extraction or the
+notification. A bounded source-truncated fragment may remain a hint, with known
+truncation qualified; absence of that qualification does not certify completeness.
+Do not describe any hint as verified or complete.
 
-| Canonical charset | Additional accepted labels |
-| --- | --- |
-| UTF-8 | `csUTF8` |
-| US-ASCII | `iso-ir-6`, `ISO646-US`, `us`, `IBM367`, `cp367`, `csASCII` |
-| Windows-1251 | `cswindows1251` |
-| KOI8-R | `csKOI8R` |
-| KOI8-U | `csKOI8U` |
-| ISO-8859-5 | `iso-ir-144`, `ISO_8859-5`, `cyrillic`, `csISOLatinCyrillic` |
-| ISO-8859-1 | `iso-ir-100`, `ISO_8859-1`, `latin1`, `l1`, `IBM819`, `CP819`, `csISOLatin1` |
+Ensure any retained hint is valid UTF-8 display text. Normalize or remove CR, LF,
+NUL, and other controls, or omit the value; decoding must not inject headers or
+break serialization. Destination escaping is still required and does not make
+the text trusted markup. Preserve privacy filters: an explicitly masked or
+masking-failed hint is omitted, not recovered from another raw representation.
 
-These are selected IANA names/aliases that also satisfy RFC 2047's charset-token
-syntax. Registered names containing a dot or colon are not accepted inside an
-encoded word. Common decoder extensions such as `utf8` and `cp1251`, language
-suffixes, and future registry additions are not implicitly added to this table.
-Changing the table is a versioned profile/compatibility change.
-
-Accept only the case-insensitive `B` and `Q` encoded-word forms. Each word is at
-most 75 ASCII characters including delimiters; its encoded text is nonempty and
-contains no literal whitespace or question mark. Validate standard base64
-alphabet, placement/padding, and unused trailing bits before `B` decoding. In
-`Q`, underscore means space and an equals sign requires two hexadecimal digits;
-both uppercase and lowercase hex digits are accepted. Do not borrow base64url or
-body quoted-printable's soft-line-break behavior.
-
-Decode every word independently under its declared charset. Incomplete multibyte
-characters cannot be repaired by concatenating bytes from another word. Ignore
-only the permitted linear whitespace between adjacent encoded words; preserve
-ordinary text spacing and require valid boundaries between words and plain text.
-Header folding must first pass the declared source-format contract. An unfolded
-log value does not establish the original wire header's line lengths. An encoded
-word introducer that cannot be parsed under this subset is an explicit invalid
-or unsupported fact, not an excuse to forward its undecoded spelling.
-
-US-ASCII rejects bytes above 127; UTF-8 requires valid scalar sequences. Legacy
-single-byte decoding rejects undefined code points rather than replacing them
-(including Windows-1251 byte `0x98`). All decoded text still passes the control
-character and total-size checks below. Library leniency is not validation.
-
-Validate the decoded display value as well as the source representation. Reject
-remaining CR, LF, NUL, and other control characters rather than silently
-removing them. A syntactically valid encoded word that decodes to such characters
-is not an acceptable display subject. Destination escaping remains a separate
-formatting responsibility; this validation does not make the value trusted markup.
-
-Malformed encoded words, invalid UTF-8, unsupported charsets, and known source
-truncation have explicit outcomes. Do not silently replace undecodable bytes,
-send encoded text as a substitute for required decoded subject, or invent omitted
-characters. A forgiving library decoder is not proof that malformed-looking input
-is valid: the supported cases and failure behavior require tests. Unsupported or
-invalid subject facts cannot satisfy required decoded context; detection/enrichment
-owns waiting and final unresolved outcomes under the existing fallback policy.
-Source-format coverage, decoder evidence, and any additional
-decoding dependency remain
-[open](open-decisions.md#mail-scenario).
+Missing, invalid, conflicting, or over-limit hints remain optional. Safe bounded
+quality codes can explain omission without exposing their content or creating a
+business-failure notice. Concrete source mappings, library/dependency review, and
+bounded decoder behavior still need implementation tests, not a subject-proof
+acceptance gate; see [Open decisions](open-decisions.md#mail-scenario).
 
 Keep three times distinct: source search time, acquisition/observation time, and
 the relevant business time. The agreed mail notification timestamp means receipt
@@ -286,15 +244,17 @@ contract. The following additional defaults are **approved, not benchmarked**:
 | --- | --- |
 | Normalized fact fields per observation | 32, with declared names |
 | Total normalized fact content | 16 KiB |
-| Decoded subject | 8 KiB, also within the total content limit |
+| Subject hint display text | 8 KiB, also within the total content limit |
 | Regular-expression patterns per profile | 32 |
 | Single pattern text | 4 KiB |
 
-Exceeding an output limit produces an explicit failure, not a silently truncated
-subject or partial success assembled by dropping fields. Bound conversion and
-decoding buffers before allocation, including charset expansion. Record-local
-scratch/output allocations count against the shared ingestion buffer budget;
-there is no independent unbounded extraction queue.
+Exceeding a required-fact output limit produces an explicit failure, not a partial
+success assembled by dropping required fields. If only the optional subject hint
+exceeds its bound or the remaining content budget, omit it with a safe quality
+code and retain independently valid required facts. Bound conversion and decoding
+buffers before allocation, including charset expansion. Record-local scratch/output
+allocations count against the shared ingestion buffer budget; there is no
+independent unbounded extraction queue.
 
 Finite input size, pattern count, and bounded regular-expression behavior limit
 work, but do not establish a benchmarked CPU latency or process-RSS guarantee.
@@ -323,21 +283,18 @@ processing duration and limit failures with bounded, non-sensitive labels.
   even when acquisition time changes. Normalization never changes the fingerprint.
 - Missing year/timezone and different search/business times do not introduce
   machine-clock or local-timezone inference.
-- Subject cases cover plain text, multiple encoded words, supported folding,
-  unsupported charsets, malformed words, invalid UTF-8, known truncation, and
-  control/header-injection characters both before and after decoding.
+- Subject cases cover plain text, B/Q words, supported folding, multiple charsets,
+  malformed words, unknown charsets, invalid Unicode, truncation, and controls.
+  Replacement or omission cannot break serialization or required-fact extraction.
 - Synthetic outer/nested-message cases include different subjects, no outer
-  Subject, and only one observed nested Subject. No count, ordering, or queue-ID
-  heuristic can promote unproven nested/header origin into a primary subject.
-- Each approved subject charset and accepted alias has synthetic decoding cases;
-  mixed encoded words remain valid only when every part passes its declared
-  charset and syntax checks. Unsupported labels, host-locale differences, and
-  decoder leniency cannot broaden the accepted table or hide invalid bytes.
-- Cases distinguish permitted inter-word whitespace from forbidden intra-word
-  whitespace, 75-character boundaries, lowercase Q hex digits, invalid base64
-  padding/trailing bits, split multibyte characters, and undefined legacy bytes.
-- Pattern, field, record, output, and expansion limits fail explicitly without
-  clipping, uncontrolled allocation, or retained per-record caches.
+  Subject, and only one nested Subject. Known nested/MIME and indistinguishable
+  origin are omitted without waiting or promoting the first/last/only match.
+- Missing, damaged, conflicting, source-truncated, and oversized hints do not
+  invalidate independently valid rejection, envelope, receipt, or lifecycle facts.
+  Masked values cannot reappear through raw fallback; retained hints stay bounded.
+- Pattern, required-field, record, output, and expansion limits fail explicitly
+  without uncontrolled allocation or retained per-record caches. Optional hint
+  overflow follows the omission policy rather than dropping required facts.
 - Configuration rejects unsupported profiles, invalid producer relationships,
   invalid patterns, and unresolved semantic dependencies before processing.
 - Diagnostics contain bounded codes and declared names, not source values or
@@ -353,7 +310,6 @@ public fixtures. These are approved acceptance criteria, not implemented tests.
 ## Public references
 
 - [RFC 2047 encoded-word syntax and interpretation](https://www.rfc-editor.org/rfc/rfc2047.html)
-- [IANA character set names and aliases](https://www.iana.org/assignments/character-sets/character-sets.xhtml)
 
-The selected table is fixed by this profile, not fetched at runtime. These
-references do not establish decoder or deployment-source conformance.
+The reference describes the encoding, not a custom strict validator or evidence
+of decoder or deployment-source conformance.

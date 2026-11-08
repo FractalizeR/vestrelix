@@ -80,6 +80,10 @@ are configuration errors. A runtime-invalid required condition is explicit
 unresolved routing, not a silent match, catch-all, or intentional no-destination
 decision.
 
+The mail subject hint is display-only: it cannot be a route/business condition,
+select an audience, or drive automated business actions. Reject such configured
+uses rather than making an optional hint a hidden notification prerequisite.
+
 Use separate destination capabilities, both disabled by default:
 
 | Kind | Eligibility |
@@ -116,9 +120,14 @@ There is no wildcard projection or raw-record fallback. Unknown references fail
 configuration validation; a required permitted value unavailable at formation
 produces a visible formation failure, not an empty or invented value.
 
-The first mail notification retains only envelope sender, rejected envelope
-recipient, decoded subject, and outbound relay receipt time. Context and evidence
-metadata do not become extra message fields just because detection retained them.
+The first mail notification requires envelope sender, rejected envelope recipient,
+and outbound relay receipt time. Only an optional subject hint may supplement
+them. The formatter must allow omission of that hint: missing or unusable subject
+text is not unresolved routing or formation failure, and no value is invented.
+If included, it remains an untrusted best-effort hint, not a verified complete
+subject. Context and evidence metadata do not become extra message fields just
+because detection retained them. Existing field allowlists, privacy filters, and
+destination-specific escaping apply to the hint as well as required content.
 
 Fallback selection belongs to the approved extraction semantics. Formatting does
 not silently repair invalid values with another meaning. If a configured variant
@@ -324,8 +333,13 @@ The following additional defaults are **approved, not benchmarked**:
 | Additional failure projection snapshot | 32 KiB; 24 hours; 16 MiB aggregate content |
 
 Exhaustion gives an explicit failure/suppression/capacity outcome, never silent
-clipping. The final byte limit includes JSON escaping expansion. Bound input
-values, structural construction, interpolation, and encoder scratch allocations;
+clipping. The final byte limit includes JSON escaping expansion. For the first mail
+profile, if including the optional hint alone exceeds the rendered-size or encoding
+expansion budget, omit it and form the permitted message without it when required
+content fits. This includes repeated hint interpolation. If required content still
+does not fit, retain the ordinary formation failure; do not drop required fields
+or raise limits. Omission must itself stay within bounded work and allocation.
+Bound input values, structural construction, interpolation, and encoder scratch allocations;
 a limited output writer alone is insufficient if an encoder builds an oversized
 buffer before writing. Reserve shared processing memory before formation and
 release it after handoff; do not construct an unbounded list of payloads in RAM.
@@ -348,6 +362,12 @@ independent limit does not reserve unlimited disk space elsewhere.
   invalid conditions, and intentional no-destination outcomes remain distinct.
 - Effective-value fallback retains semantic qualification; null envelope sender
   and the first scenario's envelope-only requirements are preserved.
+- Subject-based route/business conditions are rejected. Missing or unusable hints
+  do not fail formation; permitted hints remain escaped display text, never extra
+  audience authority or a raw-record fallback.
+- Repeated interpolation or escaping expansion that overflows only because of the
+  hint produces a bounded hint-free message when required content fits. Required
+  content overflow still fails explicitly without clipping or increased limits.
 - JSON values, destination markup/mentions, malformed fields, forbidden template
   syntax, output expansion, depth, and structure limits have explicit safe outcomes.
 - Source replay, parser/template changes, and late event-ID assignment preserve

@@ -158,10 +158,13 @@ identity, event identity, and destination-specific delivery identity are not
 interchangeable.
 
 The normalized event carries validated envelope sender, rejected envelope recipient,
-decoded subject, relay receipt timestamp, failure event time, detection time,
-necessary evidence qualifications, and applicable revisions. Routing exposes only
-the permitted fields for a destination; the mail notification remains limited to
-the four fields in functional scope.
+relay receipt timestamp, failure event time, detection time, necessary evidence
+qualifications, and applicable revisions. It may also carry a bounded subject hint
+under the [extraction policy](extraction-and-normalization.md#subject-and-time-handling).
+The hint is not part of lifecycle proof, occurrence/event/delivery identity, event
+conditions, audience selection, or automated business actions. This does not change
+source-record fingerprint semantics. Routing exposes only the three required mail
+fields and optional hint permitted by functional scope.
 
 The SMTP null reverse path is valid envelope context. An opt-in effective sender
 chosen from header `From:` retains that meaning and cannot silently satisfy this
@@ -171,18 +174,25 @@ requirements and labeling.
 ## Context, candidates, and durable transitions
 
 Receipt/context observations can create minimal operation state before a failure
-is known. Keep only required sender, subject, receipt time, selected evidence
-references, and lifecycle/provenance qualifications. Unresolved evidence is not
-merged across possible generations. Do not persist raw logs, full SMTP diagnostics,
-bodies, attachments, or a list of unrelated recipients as a convenience.
+is known. Keep only required sender, receipt time, an optional bounded subject hint,
+selected evidence references, and lifecycle/provenance qualifications. Unresolved
+evidence is not merged across possible generations. Do not persist raw logs, full
+SMTP diagnostics, bodies, attachments, or unrelated recipients as a convenience.
 
 Validate cross-record consistency within a proven generation as well as each
-observation's quality. Independently valid but incompatible sender, subject,
+observation's quality. Independently valid but incompatible sender,
 receipt-time, or other required facts retain an explicit conflict qualification;
 do not resolve them through silent last-write-wins or arrival order. Affected
 fields cannot satisfy finalization until supported profile semantics resolve the
 contradiction with preserved provenance. If that is impossible within budget,
 completion remains unresolved.
+
+The optional subject hint is different: conflicting or ambiguous hints are omitted,
+not resolved by arrival order. Missing, damaged, truncated, or oversized hints do
+not require enrichment, extend waiting, block finalization, or create an unresolved
+terminal outcome. A usable hint can accompany already available context, but its
+absence never creates lookup work. Late or changed hints do not create another
+event/job or mutate a frozen notification payload.
 
 Preserving context before the future recipient is known has a privacy/storage
 cost: configured source scopes must be narrow, and retention/capacity applies to
@@ -346,10 +356,10 @@ still need a supported profile contract.
 
 These are deployment-specific feasibility observations, not universal Postfix
 defaults or acceptance evidence. They do not establish complete source selection,
-unambiguous queue-ID generations, absence of subject truncation, all supported
-formats/charsets, or availability throughout the retention horizon. Do not derive
-required guarantees from a finite sample. No operational values, raw records,
-connection details, exact sampling dates/counts, or private fixtures accompany
+unambiguous queue-ID generations, required-format coverage, or availability
+throughout the retention horizon. Do not derive required guarantees from a finite
+sample. No operational values, raw records, connection details, exact sampling
+dates/counts, or private fixtures accompany
 this note; public tests must use independently written synthetic cases.
 
 ### Public upstream constraints, not deployment conclusions
@@ -368,12 +378,10 @@ or every deployed version. It can discard a subject suffix without an explicit
 ellipsis, including part of an encoded word. A complete JSON record and closing
 log-context trailer therefore do not prove a complete subject.
 
-A supported source/profile must establish the selected producer's bounds and
-transformations. Values reaching a known content limit are potentially truncated
-even when syntactically decodable; classify them explicitly unless independent
-complete same-meaning evidence resolves the issue. Do not guess lost suffixes or
-silently relax the required decoded subject. Installed version, logging actions,
-collector transformations, and instance provenance still need deployment evidence;
+The optional hint may therefore be incomplete even when decodable. Preserve known
+truncation qualifications without guessing lost suffixes or requiring a full value.
+This does not block an otherwise proven rejection. Required envelope, receipt,
+and lifecycle evidence still needs supported mappings and source conformance;
 these public observations do not establish truncation or a defect in an inspected
 deployment.
 
@@ -381,16 +389,14 @@ Postfix also documents `nested_header_checks` as inheriting `header_checks` by
 default and inspecting headers of attached messages. In the pinned header callback,
 primary, MIME, and nested checks all invoke the same `header` action context.
 Consequently, an `INFO` Subject record need not identify header depth unless its
-producer/action has an independently verified distinguishing contract. This does
-not make every INFO producer unsupported: an explicitly proven primary-only
-producer or other trusted discriminator can satisfy the requirement.
+configured source profile distinguishes outer from nested/MIME records. Select an
+outer-message source when available; no new proof protocol is required for a hint.
 
 A sole decodable Subject entry cannot prove that the outer message had that
 Subject; an outer message can lack the header while an attachment supplies one.
-Do not select the first, last, or only matching Subject as a workaround. Missing
-primary-origin evidence is a source/profile gate under the existing prohibition
-on Postfix configuration changes, not permission to forward an attachment's subject or claim
-that every possible alternative source is unavailable.
+Do not select the first, last, or only matching Subject as a workaround. If origin
+cannot be distinguished, omit the hint without waiting or changing Postfix. This
+is not a gate on rejection notification or on the independent lifecycle proof.
 
 ## Test criteria
 
@@ -409,6 +415,13 @@ that every possible alternative source is unavailable.
   competing evidence never attach another message's sender or subject.
 - Conflicting valid facts across records cannot overwrite context silently or
   satisfy required fields until the profile resolves their semantic relationship.
+- Missing, damaged, ambiguous, conflicting, truncated, or oversized hints cannot
+  block an otherwise confirmed event, add lookups, or extend waiting. Nested/MIME
+  and unknown-origin hints are omitted. Invalid lifecycle/message/recipient binding
+  still prevents confirmation, independently of any hint.
+- Late or changed hints do not change occurrence/event/delivery identity, create
+  another job, or mutate frozen payloads. Source-record fingerprints keep their
+  existing equivalence contract.
 - Settlement through a result is not accepted as sufficient proof when source
   coordinates can put a competing start later; unknown proof remains unresolved.
 - Late/out-of-order context and restart days after receipt preserve identity,

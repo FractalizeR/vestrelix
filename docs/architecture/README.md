@@ -61,3 +61,34 @@ there rather than choosing missing answers implicitly.
 The package tree describes intended responsibilities, not an instruction to create
 empty packages. Go interfaces, SQL schemas, dependency version pins, and an
 implementation sequence are outside the current baseline.
+
+## Agreed simplification and next step
+
+The mail subject is an optional diagnostic hint, not required event evidence. The
+[functional scope](../../FEATURES.md#first-acceptance-scenario-permanent-mail-rejection) and
+[extraction policy](extraction-and-normalization.md#subject-and-time-handling)
+define bounded best-effort display and omission, without a strict charset table
+or completeness/authenticity proof. This does not weaken the required binding of
+a permanent remote rejection to the correct message and envelope recipient.
+
+The block-by-block architecture discussion is complete. The next step is a short,
+reviewed implementation plan for one working vertical slice, not another broad
+architecture round or a claim that all implementation details are settled:
+
+1. Specify the minimal concrete configuration and matching offline schema, SQLite
+   tables/transactions, and source/occurrence/delivery identity contracts needed by
+   the slice, consistent with the approved block contracts.
+2. Plan VictoriaLogs input → confirmed recipient-specific permanent remote
+   rejection → durable SQLite delivery job → HTTP notification. Begin with
+   independently written synthetic fixtures and a local HTTP receiver.
+3. Include acceptance tests for replay and duplicate prevention, restart and
+   interrupted commits, late/out-of-order context, destination outage/recovery,
+   optional-hint omission, privacy/escaping, and ambiguous HTTP outcomes.
+4. Obtain source/transport/resource conformance evidence through implementation
+   and tests as the relevant parts are built. Keep unsupported cases and deployment
+   assumptions explicit in [Open decisions](open-decisions.md); specifications and
+   green repository-tooling checks do not supply that evidence.
+
+No application implementation or deployment is authorized by this documentation
+update. Required concrete contracts and review precede implementation. Synthetic
+development does not depend on changing the observed SMTP path or a live system.

@@ -240,24 +240,29 @@ within the configured budget, with the same delivery identity and content.
 ## First scenario: permanent mail rejection
 
 1. **Observe initial context.** The configured input includes context-bearing
-   records, not only rejection records. Preserve minimal envelope sender, subject,
-   original time, and sufficient operation-lifecycle evidence when available.
-   Bounded history lookup supplements this context. Persisting these facts avoids
+   records, not only rejection records. Preserve minimal envelope sender, relay
+   receipt time, sufficient operation-lifecycle evidence, and an optional bounded
+   subject hint when available. Bounded history lookup supplements this context.
+   Persisting these facts avoids
    relying exclusively on old log availability for rejection days later.
 2. **Recognize a recipient-specific rejection.** Detection requires a matching
    domain, a final delivery failure, and explicit permanent rejection by the remote
    SMTP server. `status=bounced` alone, local errors, deferrals, timeouts, and queue
    expiry without remote rejection do not qualify. Only qualifying rejected
    recipients produce events.
-3. **Wait for missing context.** Before read progress advances, missing context
-   becomes durable enrichment work. Out-of-order records or history lookup can
-   complete it within the allowed wait. Expiry produces a visible unresolved
-   outcome, not invented values or a raw-record fallback.
+3. **Wait for missing required context.** Before read progress advances, missing
+   required context becomes durable enrichment work. Out-of-order records or
+   history lookup can complete it within the allowed wait. Expiry produces a visible unresolved
+   outcome, not invented values or a raw-record fallback. Missing or unusable
+   subject hints do not create lookups, waiting, or unresolved outcomes.
 4. **Create permitted messages.** Finalization and routing persist independent
    delivery assignments. Each message contains only envelope sender, rejected
-   envelope recipient, decoded subject, and the outbound relay receipt timestamp. It
-   excludes body, attachments, other recipients, and raw SMTP diagnostics. JSON
-   and destination-specific message values are escaped correctly.
+   envelope recipient, the outbound relay receipt timestamp, and optionally a
+   best-effort subject hint. It excludes body, attachments, other recipients, and
+   raw SMTP diagnostics. JSON and destination-specific message values are escaped
+   correctly. The hint does
+   not identify the event, select its audience, or drive business actions; later
+   hint changes neither recreate jobs nor mutate frozen content.
 5. **Read the same records again.** Record replay protection prevents repeating
    already accepted record effects where supported by the source identity
    contract. Event and delivery identities independently prevent recreating the
@@ -271,14 +276,16 @@ within the configured budget, with the same delivery identity and content.
    A non-idempotent webhook may display a duplicate. Budget exhaustion records
    non-delivery rather than claiming success.
 
-The source must actually contain the required context. This architecture cannot
-recover a subject or lifecycle evidence that was never logged. A
+The source must actually contain the required envelope, receipt, and lifecycle
+context. This architecture cannot recover evidence that was never logged. Subject
+text is optional: use the configured outer-message source, omitting nested/MIME or
+indistinguishable origin without requiring source changes. A
 [preliminary source inspection](detection-correlation-and-enrichment.md#preliminary-source-feasibility)
 supports field-availability feasibility, not source/lifecycle conformance. The
 initial address scope is ASCII, including ASCII punycode domain representations;
 Unicode local parts/domain forms remain unsupported without automatic conversion.
-Subject charset coverage is separate. Concrete source formats, history
-availability, and proof evidence remain
+Best-effort subject decoding is separate from required evidence. Concrete source
+formats, history availability, and proof evidence remain
 [open](open-decisions.md#mail-scenario).
 
 ## Privacy, capacity, and operations

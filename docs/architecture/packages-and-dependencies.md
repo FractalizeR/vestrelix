@@ -170,7 +170,7 @@ configuration parsers are not reimplemented locally.
 | Structured logs | `log/slog` |
 | SQLite access boundary | `database/sql` plus a driver |
 | JSON and regular expressions | `encoding/json`, `regexp` |
-| Subject decoding | `mime.WordDecoder`; additional charset support only when required |
+| Optional subject hint decoding | `mime.WordDecoder` for bounded best-effort display; additional charset support only when useful and reviewed, without a custom strict validator or closed alias table |
 | Initial CLI | `flag` |
 | Tests | `testing`, `net/http/httptest`, fuzzing |
 

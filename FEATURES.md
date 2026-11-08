@@ -197,14 +197,22 @@ representations. Unicode local parts and Unicode-form domain names are explicitl
 unsupported, without automatic conversion. This does not restrict subjects to
 ASCII or change the valid SMTP null reverse path.
 
-The notification contains only the SMTP envelope sender, the rejected SMTP
-recipient, the decoded subject, and the timestamp of receipt by the outbound
-relay. Do not include the body, attachments, other recipients, or raw SMTP
-diagnostics.
+The notification requires the SMTP envelope sender, the rejected SMTP recipient,
+and the timestamp of receipt by the outbound relay. It may also include a bounded,
+best-effort decoded subject as an optional diagnostic hint for a person. Do not
+include the body, attachments, other recipients, or raw SMTP diagnostics.
 
-The subject belongs to the outer message whose delivery failed, not to a message
-attached to it. Source evidence must establish both that provenance and a complete
-value; finding one decodable Subject entry is not sufficient by itself.
+The subject hint does not identify the message, establish rejection or delivery,
+select a notification audience, or drive automated business actions. Missing,
+damaged, ambiguous, truncated, or oversized hints do not block an otherwise
+confirmed notification. Completeness and authenticity are not promised; no strict
+charset allowlist or subject-proof protocol is required.
+
+Use the configured outer-message subject source, not a known attached-message or
+MIME header. If the source cannot distinguish these roles, omit the hint rather
+than guessing from the first, last, or only Subject record. This omission does not
+delay notification. Safe display, destination escaping, and privacy restrictions
+still apply to any included hint.
 
 Envelope addresses need not equal the `From:`/`To:` headers. The notification time
 means receipt by the outbound relay, not the message's `Date:` header or an earlier
@@ -258,8 +266,8 @@ require rewriting existing event rules. Do not build all adapters in advance.
 - Native health/readiness/metric behavior and concrete externally evaluated alert
   rules under the approved operations contract; deployment thresholds need tuning.
 - Concrete validation/source-format evidence for the initial ASCII address scope,
-  subject charset coverage, context/history availability, and evidence for the
-  required queue-ID lifecycle proof in the mail scenario.
+  bounded best-effort subject handling, context/history availability, and evidence
+  for the required queue-ID lifecycle proof in the mail scenario.
 
 Changing a template or restarting the process must not silently resend historical
 events. History replay and manual retries are explicit operations, not incidental
