@@ -45,14 +45,33 @@ identity must be distinct concepts.
   executes queries; source-independent detection rules do not embed LogsQL.
 - Support multiple configured inputs, rules, and destinations within one process.
 - Extract fields only when needed; reuse fields already returned by the source.
+- Support explicit field-producer fallback chains while preserving meaning and
+  provenance. Cross-meaning fallback requires opt-in and accurate labeling;
+  invalid values cannot silently disappear through fallback. A valid SMTP null
+  reverse path is not missing sender data.
 - Persist read progress and resume after restart.
+- Configure the source observation/context-loading start separately from the
+  business-event notification cutoff. Earlier history may supply context without
+  notifying about earlier failures; restarting does not move either boundary.
+- Recover outages from committed progress without automatically skipping to the
+  present or imposing an arbitrary maximum outage duration. Delayed eligible
+  notifications remain allowed, subject to available history and ordinary limits.
+  Confirmed history loss blocks the affected input pending explicit supported
+  recovery; unverifiable history remains visibly uncertain.
 - Handle duplicate and late-arriving records through overlapping windows and
   deduplication. Define the supported lateness bound explicitly; arbitrary delays
   cannot be covered by a finite lookback window.
+- Initially support log lateness up to one hour. For record replay protection,
+  accept collapsing completely identical records within one source view using a
+  stable content fingerprint; this is not a claim of physical-record uniqueness.
 - Bound request duration, response size, and records processed per query.
 - Distinguish a successful empty result from a failed, truncated, or incomplete
   query. Do not advance progress as though incomplete data were fully processed.
 - Validate configuration before processing and provide a validation-only command.
+- Provide a version-matched JSON Schema for YAML configuration, with descriptions
+  and synthetic examples for users, editors, and agents. Support local/offline
+  structural validation and test agreement with the strict loader; keep semantic,
+  state-compatibility, and source/profile checks explicit and separate.
 - Provide a dry-run mode that evaluates rules without delivering notifications or
   acknowledging production delivery jobs.
 
@@ -65,6 +84,9 @@ identity must be distinct concepts.
 - Tolerate related records arriving out of order with a bounded enrichment wait.
 - Define explicit outcomes for missing fields, unsupported records, and expired
   enrichment attempts; do not silently invent values or discard failures.
+- Log processing failures safely, allow destinations to opt into processing-error
+  notifications, and support destinations designated for system notifications.
+  Keep error reporting bounded and prevent recursive notification failures.
 - Preserve event time separately from detection time.
 - Produce a normalized event before formatting a destination-specific message.
 - Do not execute arbitrary code, shell commands, or executable plugins supplied
@@ -105,6 +127,10 @@ identity must be distinct concepts.
 - Bound automatic retry work by a configured time and/or attempt budget. Exhausted
   jobs become visibly undelivered and remain available for inspection and explicit
   retry under a documented retention policy.
+- Use an initial automatic retry policy of approximately ten retries within one
+  hour for source reads and webhook delivery. Persist budgets across restarts;
+  source-read exhaustion pauses the affected input without advancing progress.
+  Selected defaults are recorded in the architecture, not implemented behavior.
 - Provide an explicit operation to requeue undelivered jobs.
 - A failing destination must not block other destinations or the observed service.
 
@@ -166,15 +192,34 @@ For a message with multiple recipients, create events only for rejected recipien
 whose domains match the allowlist. Correlation must account for the originating
 relay and the queue-ID lifecycle, including potential ID reuse.
 
-The notification contains only the SMTP envelope sender, the rejected SMTP
-recipient, the decoded subject, and the original submission timestamp. Do not
+Initially support ASCII envelope addresses, including ASCII punycode domain
+representations. Unicode local parts and Unicode-form domain names are explicitly
+unsupported, without automatic conversion. This does not restrict subjects to
+ASCII or change the valid SMTP null reverse path.
+
+The notification requires the SMTP envelope sender, the rejected SMTP recipient,
+and the timestamp of receipt by the outbound relay. It may also include a bounded,
+best-effort decoded subject as an optional diagnostic hint for a person. Do not
 include the body, attachments, other recipients, or raw SMTP diagnostics.
 
-Envelope addresses need not equal the `From:`/`To:` headers. The readily available
-timestamp is receipt by the outbound relay, not necessarily the message's `Date:`
-header. Confirm and document the final timestamp meaning before implementing the
-scenario. A rejection days later must still be correlated with the original
-message, including across Vestrelix restarts.
+The subject hint does not identify the message, establish rejection or delivery,
+select a notification audience, or drive automated business actions. Missing,
+damaged, ambiguous, truncated, or oversized hints do not block an otherwise
+confirmed notification. Completeness and authenticity are not promised; no strict
+charset allowlist or subject-proof protocol is required.
+
+Use the configured outer-message subject source, not a known attached-message or
+MIME header. If the source cannot distinguish these roles, omit the hint rather
+than guessing from the first, last, or only Subject record. This omission does not
+delay notification. Safe display, destination escaping, and privacy restrictions
+still apply to any included hint.
+
+Envelope addresses need not equal the `From:`/`To:` headers. The notification time
+means receipt by the outbound relay, not the message's `Date:` header or an earlier
+submission elsewhere. A rejection days later must still be correlated with the
+original message, including across Vestrelix restarts. Initially retain minimal
+message context for seven days. Longer-lived operations need an explicit policy;
+context expiry cannot silently remove pending processing or delivery obligations.
 
 ## Extension points, not initial-release commitments
 
@@ -205,15 +250,24 @@ require rewriting existing event rules. Do not build all adapters in advance.
 
 ## Decisions to resolve during design
 
-- Configuration format and the bounded expression/extraction mechanisms.
-- Source-record identities and late-record handling for each adapter.
-- Enrichment lookup strategy, caching, and expiry semantics.
-- Default retry, timeout, capacity, and retention limits; behavior at capacity.
-- Dry-run isolation and explicit history replay/reprocessing behavior.
-- Rule/configuration revisions, state compatibility, and SQLite schema migrations.
-- Safe health/readiness criteria and the initial metric/alert contract.
-- Recipient-domain/subdomain matching, missing-subject handling, and timestamp
-  semantics for the mail scenario.
+- Concrete YAML fields/schema and supported operators for the approved bounded
+  condition/extraction mechanisms.
+- Encoder/source-view compatibility and adapter-specific completeness/lateness
+  evidence under the selected fingerprint envelopes and approved source-read contract.
+- Concrete enrichment bindings, recoverable definitions, and source-proof evidence
+  under the approved wait/lookup/expiry contract.
+- Native/resource evidence for approved capacity, retention, retry, and exhaustion
+  policies, including page/WAL amplification and safe identity retirement.
+- Evidence for approved dry-run isolation; explicit history replay/reprocessing
+  behavior remains a separate contract.
+- Concrete rule/configuration AST bodies, encoder/compiler conformance, gated
+  compatibility/replay/recovery transitions, SQLite schemas, and migration paths
+  under the selected encoding/operator specifications and approved lifecycle policy.
+- Native health/readiness/metric behavior and concrete externally evaluated alert
+  rules under the approved operations contract; deployment thresholds need tuning.
+- Concrete validation/source-format evidence for the initial ASCII address scope,
+  bounded best-effort subject handling, context/history availability, and evidence
+  for the required queue-ID lifecycle proof in the mail scenario.
 
 Changing a template or restarting the process must not silently resend historical
 events. History replay and manual retries are explicit operations, not incidental
